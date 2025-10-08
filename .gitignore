@@ -1,0 +1,8 @@
+# environment variables file
+.env
+
+# the ~ zone
+~
+
+# temporary files
+temp

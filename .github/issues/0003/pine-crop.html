@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pine Crop</title>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <style>
+        [x-cloak] { display: none !important; }
+        
+        /* Dark mode support */
+        :root {
+            --bg-primary: #f9fafb;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f3f4f6;
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --text-tertiary: #6b7280;
+            --border-color: #d1d5db;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        
+        .dark {
+            --bg-primary: #1f2937;
+            --bg-secondary: #374151;
+            --bg-tertiary: #4b5563;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-tertiary: #9ca3af;
+            --border-color: #4b5563;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+        }
+        
+        .crop-container {
+            position: relative;
+            display: inline-block;
+            user-select: none;
+        }
+        
+        .crop-overlay {
+            position: absolute;
+            border: 2px solid #3B82F6;
+            background-color: rgba(59, 130, 246, 0.1);
+            cursor: move;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+        }
+        
+        .resize-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #3B82F6;
+            border: 2px solid white;
+        }
+        
+        .resize-handle-nw { top: -5px; left: -5px; cursor: nw-resize; }
+        .resize-handle-ne { top: -5px; right: -5px; cursor: ne-resize; }
+        .resize-handle-sw { bottom: -5px; left: -5px; cursor: sw-resize; }
+        .resize-handle-se { bottom: -5px; right: -5px; cursor: se-resize; }
+        .resize-handle-n { top: -5px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
+        .resize-handle-s { bottom: -5px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
+        .resize-handle-w { top: 50%; left: -5px; transform: translateY(-50%); cursor: w-resize; }
+        .resize-handle-e { top: 50%; right: -5px; transform: translateY(-50%); cursor: e-resize; }
+        
+        /* Custom utility classes for dark mode */
+        .bg-body { background-color: var(--bg-primary); transition: background-color 0.2s; }
+        .bg-card { background-color: var(--bg-secondary); transition: background-color 0.2s; }
+        .bg-subtle { background-color: var(--bg-tertiary); transition: background-color 0.2s; }
+        .text-primary { color: var(--text-primary); transition: color 0.2s; }
+        .text-secondary { color: var(--text-secondary); transition: color 0.2s; }
+        .text-tertiary { color: var(--text-tertiary); transition: color 0.2s; }
+        .border-custom { border-color: var(--border-color); transition: border-color 0.2s; }
+        .shadow-custom { box-shadow: var(--shadow); transition: box-shadow 0.2s; }
+        
+        /* Basic layout utilities */
+        .min-h-screen { min-height: 100vh; }
+        .max-w-7xl { max-width: 80rem; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .p-6 { padding: 1.5rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-1 { margin-top: 0.25rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded { border-radius: 0.25rem; }
+        .rounded-full { border-radius: 9999px; }
+        .block { display: block; }
+        .inline-block { display: inline-block; }
+        .inline-flex { display: inline-flex; }
+        .flex { display: flex; }
+        .grid { display: grid; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-4 { gap: 1rem; }
+        .gap-2 { gap: 0.5rem; }
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .w-full { width: 100%; }
+        .max-w-full { max-width: 100%; }
+        .overflow-auto { overflow: auto; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .text-xs { font-size: 0.75rem; line-height: 1rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .font-bold { font-weight: 700; }
+        .font-semibold { font-weight: 600; }
+        .font-medium { font-weight: 500; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .p-4 { padding: 1rem; }
+        .p-3 { padding: 0.75rem; }
+        .border { border-width: 1px; }
+        .cursor-pointer { cursor: pointer; }
+        .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+        .transition-colors { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+        .duration-200 { transition-duration: 200ms; }
+        .duration-300 { transition-duration: 300ms; }
+        .h-2 { height: 0.5rem; }
+        
+        /* Responsive grid */
+        @media (min-width: 768px) {
+            .md\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (min-width: 1024px) {
+            .lg\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        }
+        
+        /* Buttons */
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover { background-color: #2563eb; }
+        .btn-primary:disabled { background-color: #9ca3af; cursor: not-allowed; }
+        
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-secondary:hover { background-color: #4b5563; }
+        
+        /* Input styling */
+        .input-field {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 1px #3b82f6;
+        }
+        
+        /* File input styling */
+        .file-input {
+            width: 100%;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            background-color: var(--bg-secondary);
+            transition: color 0.2s, background-color 0.2s;
+        }
+        .file-input::file-selector-button {
+            margin-right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            border: 0;
+            font-size: 0.875rem;
+            font-weight: 600;
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #1d4ed8;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .file-input::file-selector-button:hover {
+            background-color: rgba(59, 130, 246, 0.2);
+        }
+        
+        /* Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #1e40af;
+        }
+        
+        /* Progress bar */
+        .progress-bg {
+            width: 100%;
+            background-color: var(--bg-tertiary);
+            border-radius: 9999px;
+            height: 0.5rem;
+            transition: background-color 0.2s;
+        }
+        .progress-fill {
+            background-color: #3b82f6;
+            height: 0.5rem;
+            border-radius: 9999px;
+            transition: width 0.3s;
+        }
+        
+        /* Max height constraint */
+        .max-h-600 { max-height: 600px; }
+    </style>
+</head>
+<body :class="darkMode ? 'dark' : ''" class="bg-body">
+    <div x-data="imageCropper()" x-init="init()" x-cloak class="min-h-screen bg-body p-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="bg-card shadow-custom rounded-lg p-6 mb-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-bold text-primary mb-4">
+                            <i class="bi bi-crop text-blue-500"></i>
+                            Pine Crop
+                        </h1>
+                        <p class="text-secondary">Upload PNG images, set crop boundaries on the first image, and apply to all.</p>
+                    </div>
+                    <button 
+                        @click="toggleDarkMode()"
+                        class="p-3 rounded-lg bg-subtle hover:opacity-80 text-secondary transition-all duration-200"
+                        title="Toggle dark mode"
+                        style="border: 1px solid var(--border-color);">
+                        <i x-show="!darkMode" class="bi bi-moon text-xl"></i>
+                        <i x-show="darkMode" class="bi bi-sun text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- File Upload -->
+            <div class="bg-card shadow-custom rounded-lg p-6 mb-6">
+                <label class="block text-sm font-medium text-primary mb-2">
+                    Select PNG Images
+                </label>
+                <input 
+                    type="file" 
+                    @change="handleFileUpload($event)"
+                    accept=".png,image/png"
+                    multiple
+                    class="file-input">
+                
+                <div x-show="files.length > 0" class="mt-4 p-4 bg-subtle rounded">
+                    <p class="text-sm text-secondary">
+                        <i class="bi bi-images"></i>
+                        <span x-text="files.length"></span> image(s) loaded
+                    </p>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <template x-for="file in files" :key="file.name">
+                            <span class="badge">
+                                <span x-text="file.name"></span>
+                            </span>
+                        </template>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Crop Area -->
+            <div x-show="previewImage" class="bg-card shadow-custom rounded-lg p-6 mb-6">
+                <h2 class="text-lg font-semibold text-primary mb-4">Set Crop Area</h2>
+                
+                <!-- Crop Controls -->
+                <div class="mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-primary">X Position</label>
+                        <input 
+                            type="number" 
+                            x-model.number="cropX" 
+                            @input="updateCropOverlay()"
+                            class="input-field mt-1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-primary">Y Position</label>
+                        <input 
+                            type="number" 
+                            x-model.number="cropY"
+                            @input="updateCropOverlay()"
+                            class="input-field mt-1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-primary">Width</label>
+                        <input 
+                            type="number" 
+                            x-model.number="cropWidth"
+                            @input="updateCropOverlay()"
+                            class="input-field mt-1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-primary">Height</label>
+                        <input 
+                            type="number" 
+                            x-model.number="cropHeight"
+                            @input="updateCropOverlay()"
+                            class="input-field mt-1">
+                    </div>
+                </div>
+                
+                <!-- Preview Image with Crop Overlay -->
+                <div class="overflow-auto max-h-600 border border-custom rounded bg-subtle p-4">
+                    <div class="crop-container inline-block" @mousedown="startDrag($event)">
+                        <img 
+                            :src="previewImage" 
+                            id="preview-img"
+                            class="max-w-full block">
+                        <div 
+                            id="crop-overlay"
+                            class="crop-overlay"
+                            :style="`left: ${displayCropX}px; top: ${displayCropY}px; width: ${displayCropWidth}px; height: ${displayCropHeight}px;`">
+                            <!-- Resize handles -->
+                            <div class="resize-handle resize-handle-nw" @mousedown.stop="startResize($event, 'nw')"></div>
+                            <div class="resize-handle resize-handle-ne" @mousedown.stop="startResize($event, 'ne')"></div>
+                            <div class="resize-handle resize-handle-sw" @mousedown.stop="startResize($event, 'sw')"></div>
+                            <div class="resize-handle resize-handle-se" @mousedown.stop="startResize($event, 'se')"></div>
+                            <div class="resize-handle resize-handle-n" @mousedown.stop="startResize($event, 'n')"></div>
+                            <div class="resize-handle resize-handle-s" @mousedown.stop="startResize($event, 's')"></div>
+                            <div class="resize-handle resize-handle-w" @mousedown.stop="startResize($event, 'w')"></div>
+                            <div class="resize-handle resize-handle-e" @mousedown.stop="startResize($event, 'e')"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-sm text-tertiary">
+                    <i class="bi bi-info-circle"></i>
+                    Drag the blue box to position it, or drag the handles to resize. The crop area will be applied to all images.
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div x-show="files.length > 0" class="bg-card shadow-custom rounded-lg p-6">
+                <div class="flex gap-4">
+                    <button 
+                        @click="cropAllImages()"
+                        :disabled="processing"
+                        class="btn-primary">
+                        <span x-show="!processing">
+                            <i class="bi bi-crop"></i>
+                            Crop All Images
+                        </span>
+                        <span x-show="processing">
+                            <i class="bi bi-hourglass-split"></i>
+                            Processing...
+                        </span>
+                    </button>
+                    
+                    <button 
+                        @click="reset()"
+                        class="btn-secondary">
+                        <i class="bi bi-arrow-clockwise"></i>
+                        Reset
+                    </button>
+                </div>
+                
+                <div x-show="progress.total > 0" class="mt-4">
+                    <div class="flex justify-between text-sm text-secondary mb-1">
+                        <span>Processing: <span x-text="progress.current"></span> / <span x-text="progress.total"></span></span>
+                        <span><span x-text="Math.round((progress.current / progress.total) * 100)"></span>%</span>
+                    </div>
+                    <div class="progress-bg">
+                        <div 
+                            class="progress-fill"
+                            :style="`width: ${(progress.current / progress.total) * 100}%`">
+                        </div>
+                    </div>
+                </div>
+                
+                <div x-show="completedFiles.length > 0" class="mt-4 p-4 rounded" style="background-color: rgba(34, 197, 94, 0.1);">
+                    <p class="font-semibold mb-2" style="color: #15803d;">
+                        <i class="bi bi-check-circle"></i>
+                        Cropping Complete!
+                    </p>
+                    <p class="text-sm" style="color: #16a34a;">
+                        Successfully cropped <span x-text="completedFiles.length"></span> image(s).
+                        Files have been downloaded with "-crop" suffix.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function imageCropper() {
+            return {
+                files: [],
+                previewImage: null,
+                originalWidth: 0,
+                originalHeight: 0,
+                displayScale: 1,
+                cropX: 100,
+                cropY: 100,
+                cropWidth: 800,
+                cropHeight: 600,
+                displayCropX: 100,
+                displayCropY: 100,
+                displayCropWidth: 800,
+                displayCropHeight: 600,
+                processing: false,
+                progress: { current: 0, total: 0 },
+                completedFiles: [],
+                isDragging: false,
+                isResizing: false,
+                resizeHandle: null,
+                dragStart: { x: 0, y: 0 },
+                cropStart: { x: 0, y: 0, width: 0, height: 0 },
+                darkMode: false,
+                
+                init() {
+                    // Load dark mode preference from localStorage
+                    const savedDarkMode = localStorage.getItem('pineCropDarkMode');
+                    this.darkMode = savedDarkMode === 'true';
+                    this.updateDarkMode();
+                },
+                
+                toggleDarkMode() {
+                    this.darkMode = !this.darkMode;
+                    this.updateDarkMode();
+                    localStorage.setItem('pineCropDarkMode', this.darkMode.toString());
+                },
+                
+                updateDarkMode() {
+                    if (this.darkMode) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                },
+                
+                async handleFileUpload(event) {
+                    this.files = Array.from(event.target.files);
+                    this.completedFiles = [];
+                    this.progress = { current: 0, total: 0 };
+                    
+                    if (this.files.length > 0) {
+                        await this.loadPreviewImage(this.files[0]);
+                    }
+                },
+                
+                async loadPreviewImage(file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.previewImage = e.target.result;
+                        
+                        // Wait for image to load to get dimensions
+                        this.$nextTick(() => {
+                            const img = document.getElementById('preview-img');
+                            if (img) {
+                                img.onload = () => {
+                                    this.originalWidth = img.naturalWidth;
+                                    this.originalHeight = img.naturalHeight;
+                                    this.displayScale = img.width / img.naturalWidth;
+                                    
+                                    // Set default crop area (center 80% of image)
+                                    this.cropWidth = Math.round(this.originalWidth * 0.8);
+                                    this.cropHeight = Math.round(this.originalHeight * 0.8);
+                                    this.cropX = Math.round((this.originalWidth - this.cropWidth) / 2);
+                                    this.cropY = Math.round((this.originalHeight - this.cropHeight) / 2);
+                                    
+                                    this.updateCropOverlay();
+                                };
+                            }
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                },
+                
+                updateCropOverlay() {
+                    const img = document.getElementById('preview-img');
+                    if (img) {
+                        this.displayScale = img.width / this.originalWidth;
+                        this.displayCropX = this.cropX * this.displayScale;
+                        this.displayCropY = this.cropY * this.displayScale;
+                        this.displayCropWidth = this.cropWidth * this.displayScale;
+                        this.displayCropHeight = this.cropHeight * this.displayScale;
+                    }
+                },
+                
+                startDrag(event) {
+                    const overlay = document.getElementById('crop-overlay');
+                    if (event.target === overlay) {
+                        this.isDragging = true;
+                        this.dragStart = {
+                            x: event.clientX,
+                            y: event.clientY
+                        };
+                        this.cropStart = {
+                            x: this.cropX,
+                            y: this.cropY
+                        };
+                        
+                        document.addEventListener('mousemove', this.handleDrag.bind(this));
+                        document.addEventListener('mouseup', this.stopDrag.bind(this));
+                        event.preventDefault();
+                    }
+                },
+                
+                handleDrag(event) {
+                    if (this.isDragging) {
+                        const dx = (event.clientX - this.dragStart.x) / this.displayScale;
+                        const dy = (event.clientY - this.dragStart.y) / this.displayScale;
+                        
+                        this.cropX = Math.max(0, Math.min(this.originalWidth - this.cropWidth, this.cropStart.x + dx));
+                        this.cropY = Math.max(0, Math.min(this.originalHeight - this.cropHeight, this.cropStart.y + dy));
+                        
+                        this.updateCropOverlay();
+                    }
+                },
+                
+                stopDrag() {
+                    this.isDragging = false;
+                    document.removeEventListener('mousemove', this.handleDrag);
+                    document.removeEventListener('mouseup', this.stopDrag);
+                },
+                
+                startResize(event, handle) {
+                    this.isResizing = true;
+                    this.resizeHandle = handle;
+                    this.dragStart = {
+                        x: event.clientX,
+                        y: event.clientY
+                    };
+                    this.cropStart = {
+                        x: this.cropX,
+                        y: this.cropY,
+                        width: this.cropWidth,
+                        height: this.cropHeight
+                    };
+                    
+                    document.addEventListener('mousemove', this.handleResize.bind(this));
+                    document.addEventListener('mouseup', this.stopResize.bind(this));
+                    event.preventDefault();
+                },
+                
+                handleResize(event) {
+                    if (this.isResizing) {
+                        const dx = (event.clientX - this.dragStart.x) / this.displayScale;
+                        const dy = (event.clientY - this.dragStart.y) / this.displayScale;
+                        
+                        switch(this.resizeHandle) {
+                            case 'nw':
+                                this.cropX = Math.min(this.cropStart.x + this.cropStart.width - 50, this.cropStart.x + dx);
+                                this.cropY = Math.min(this.cropStart.y + this.cropStart.height - 50, this.cropStart.y + dy);
+                                this.cropWidth = this.cropStart.width - (this.cropX - this.cropStart.x);
+                                this.cropHeight = this.cropStart.height - (this.cropY - this.cropStart.y);
+                                break;
+                            case 'ne':
+                                this.cropY = Math.min(this.cropStart.y + this.cropStart.height - 50, this.cropStart.y + dy);
+                                this.cropWidth = Math.max(50, this.cropStart.width + dx);
+                                this.cropHeight = this.cropStart.height - (this.cropY - this.cropStart.y);
+                                break;
+                            case 'sw':
+                                this.cropX = Math.min(this.cropStart.x + this.cropStart.width - 50, this.cropStart.x + dx);
+                                this.cropWidth = this.cropStart.width - (this.cropX - this.cropStart.x);
+                                this.cropHeight = Math.max(50, this.cropStart.height + dy);
+                                break;
+                            case 'se':
+                                this.cropWidth = Math.max(50, this.cropStart.width + dx);
+                                this.cropHeight = Math.max(50, this.cropStart.height + dy);
+                                break;
+                            case 'n':
+                                this.cropY = Math.min(this.cropStart.y + this.cropStart.height - 50, this.cropStart.y + dy);
+                                this.cropHeight = this.cropStart.height - (this.cropY - this.cropStart.y);
+                                break;
+                            case 's':
+                                this.cropHeight = Math.max(50, this.cropStart.height + dy);
+                                break;
+                            case 'w':
+                                this.cropX = Math.min(this.cropStart.x + this.cropStart.width - 50, this.cropStart.x + dx);
+                                this.cropWidth = this.cropStart.width - (this.cropX - this.cropStart.x);
+                                break;
+                            case 'e':
+                                this.cropWidth = Math.max(50, this.cropStart.width + dx);
+                                break;
+                        }
+                        
+                        // Keep within bounds
+                        this.cropX = Math.max(0, this.cropX);
+                        this.cropY = Math.max(0, this.cropY);
+                        this.cropWidth = Math.min(this.originalWidth - this.cropX, this.cropWidth);
+                        this.cropHeight = Math.min(this.originalHeight - this.cropY, this.cropHeight);
+                        
+                        this.updateCropOverlay();
+                    }
+                },
+                
+                stopResize() {
+                    this.isResizing = false;
+                    this.resizeHandle = null;
+                    document.removeEventListener('mousemove', this.handleResize);
+                    document.removeEventListener('mouseup', this.stopResize);
+                },
+                
+                async cropAllImages() {
+                    if (this.files.length === 0) return;
+                    
+                    this.processing = true;
+                    this.completedFiles = [];
+                    this.progress = { current: 0, total: this.files.length };
+                    
+                    for (let i = 0; i < this.files.length; i++) {
+                        await this.cropSingleImage(this.files[i]);
+                        this.progress.current = i + 1;
+                    }
+                    
+                    this.processing = false;
+                },
+                
+                async cropSingleImage(file) {
+                    return new Promise((resolve) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            // Create canvas for cropping
+                            const canvas = document.createElement('canvas');
+                            canvas.width = this.cropWidth;
+                            canvas.height = this.cropHeight;
+                            const ctx = canvas.getContext('2d');
+                            
+                            // Draw cropped portion
+                            ctx.drawImage(
+                                img,
+                                this.cropX, this.cropY, this.cropWidth, this.cropHeight,
+                                0, 0, this.cropWidth, this.cropHeight
+                            );
+                            
+                            // Convert to blob and download
+                            canvas.toBlob((blob) => {
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                
+                                // Generate filename with -crop suffix
+                                const originalName = file.name.replace(/\.png$/i, '');
+                                const newName = `${originalName}-crop.png`;
+                                
+                                a.href = url;
+                                a.download = newName;
+                                a.click();
+                                
+                                URL.revokeObjectURL(url);
+                                this.completedFiles.push(newName);
+                                resolve();
+                            }, 'image/png');
+                        };
+                        
+                        // Read file and load into image
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            img.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                },
+                
+                reset() {
+                    this.files = [];
+                    this.previewImage = null;
+                    this.completedFiles = [];
+                    this.progress = { current: 0, total: 0 };
+                    this.cropX = 100;
+                    this.cropY = 100;
+                    this.cropWidth = 800;
+                    this.cropHeight = 600;
+                    document.querySelector('input[type="file"]').value = '';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
