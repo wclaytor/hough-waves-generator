@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Ccircle cx='96' cy='96' r='80' fill='%233b82f6'/%3E%3Cpath d='M96 40 L140 90 L115 90 L115 120 L77 120 L77 90 L52 90 Z' fill='white'/%3E%3C/svg%3E" sizes="any" type="image/svg+xml">
-    <title>Alpine.js Template - Starter Demo</title>
+    <title>Hough Waves - Algorithmic Art Generator</title>
     
     <!-- Alpine.js for reactivity -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -26,9 +26,6 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
-    <!-- Marked.js for Markdown parsing -->
-    <script src="https://cdn.jsdelivr.net/npm/marked@11.0.0/marked.min.js"></script>
-    
     <style>
         [x-cloak] { display: none !important; }
         
@@ -39,654 +36,297 @@
     </style>
 </head>
 <body>
-    <div x-data="starterApp()" x-cloak :class="darkMode ? 'dark' : ''" class="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 transition-colors duration-300">
-        <div class="max-w-6xl mx-auto">
+    <div x-data="houghWaves()" x-cloak :class="darkMode ? 'dark' : ''" class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+        <div class="container mx-auto p-4 md:p-6 max-w-7xl">
             <!-- Header -->
-            <header class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 transition-colors duration-300">
-                <div class="flex items-center justify-between">
+            <header class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 md:p-6 mb-4 md:mb-6 transition-colors duration-300">
+                <div class="flex items-center justify-between flex-wrap gap-4">
                     <div>
-                        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
-                            <i class="bi bi-lightning-charge text-blue-500"></i>
-                            Alpine.js Starter Demo
+                        <h1 class="text-2xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+                            <i class="bi bi-tsunami text-blue-500"></i>
+                            Hough Waves
                         </h1>
-                        <p class="text-gray-600 dark:text-gray-300">A comprehensive demonstration of Alpine.js core concepts</p>
+                        <p class="text-sm md:text-base text-gray-600 dark:text-gray-300">Algorithmic Art Generator - Transform mathematics into visual art</p>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <div class="text-right">
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Active Tasks</div>
-                            <div class="text-2xl font-bold text-blue-600 dark:text-blue-400" x-text="activeTasks"></div>
-                        </div>
-                        <button 
-                            @click="toggleDarkMode()"
-                            class="p-3 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
-                            title="Toggle dark mode">
-                            <i x-show="!darkMode" class="bi bi-moon text-xl"></i>
-                            <i x-show="darkMode" class="bi bi-sun text-xl"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Quick Actions -->
-                <div class="mt-4 flex gap-2 flex-wrap">
-                    <button @click="showModal = true" 
-                            class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg flex items-center gap-2 transition-colors duration-300">
-                        <i class="bi bi-info-circle"></i>
-                        About This Demo
-                    </button>
-                    <button @click="clearAllData" 
-                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center gap-2 transition-colors duration-300">
-                        <i class="bi bi-trash"></i>
-                        Clear All Data
-                    </button>
-                    <button @click="exportData" 
-                            class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center gap-2 transition-colors duration-300">
-                        <i class="bi bi-download"></i>
-                        Export Data
+                    <button 
+                        @click="toggleDarkMode()"
+                        class="p-3 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                        title="Toggle dark mode">
+                        <i x-show="!darkMode" class="bi bi-moon text-xl"></i>
+                        <i x-show="darkMode" class="bi bi-sun text-xl"></i>
                     </button>
                 </div>
             </header>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Left Column -->
-                <div class="space-y-6">
-                    <!-- 1. Basic Reactivity & Forms -->
-                    <section class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
-                        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
-                            <i class="bi bi-1-circle text-blue-500"></i>
-                            Basic Reactivity & Forms
-                        </h2>
-                        
-                        <!-- Simple Input Example -->
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Your Name (x-model)
-                            </label>
-                            <input x-model="userName" 
-                                   type="text" 
-                                   placeholder="Enter your name..."
-                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                Hello, <span x-text="userName || 'Anonymous'" class="font-semibold text-gray-800 dark:text-gray-200"></span>! 👋
-                            </p>
+            <!-- Canvas Section -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 md:p-6 mb-4 md:mb-6 transition-colors duration-300">
+                <canvas x-ref="canvas" 
+                        width="800" 
+                        height="600" 
+                        :class="darkMode ? 'bg-black' : 'bg-white'"
+                        class="w-full rounded shadow-lg cursor-crosshair transition-colors duration-300"
+                        style="max-height: 70vh;"></canvas>
+            </div>
+
+            <!-- Controls Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 md:mb-6">
+                <!-- Pattern Controls -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-bezier2 text-purple-500"></i>
+                        Pattern Type
+                    </h3>
+                    <select x-model="pattern" @change="generate()" 
+                            class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="wave">Wave</option>
+                        <option value="spiral">Spiral</option>
+                        <option value="circle">Circle</option>
+                        <option value="grid">Grid</option>
+                        <option value="random">Random</option>
+                    </select>
+                </div>
+
+                <!-- Points Control -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-circle-fill text-blue-500"></i>
+                        Points: <span x-text="numPoints"></span>
+                    </h3>
+                    <input type="range" x-model="numPoints" min="10" max="150" step="5"
+                           @input="generate()" 
+                           class="w-full">
+                </div>
+
+                <!-- Threshold Control -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-sliders text-green-500"></i>
+                        Threshold: <span x-text="threshold"></span>
+                    </h3>
+                    <input type="range" x-model="threshold" min="5" max="50" step="1"
+                           @input="generate()" 
+                           class="w-full">
+                </div>
+
+                <!-- Theta Resolution Control -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-diagram-3 text-indigo-500"></i>
+                        Resolution: <span x-text="thetaStep + '°'"></span>
+                    </h3>
+                    <input type="range" x-model.number="thetaStep" min="0.5" max="5" step="0.5"
+                           @input="generate()" 
+                           class="w-full">
+                </div>
+
+                <!-- Opacity Control -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-droplet text-cyan-500"></i>
+                        Opacity: <span x-text="(opacity * 100).toFixed(0) + '%'"></span>
+                    </h3>
+                    <input type="range" x-model.number="opacity" min="0.01" max="1.0" step="0.01"
+                           @input="render()" 
+                           class="w-full">
+                </div>
+
+                <!-- Color Mode Control -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-palette text-pink-500"></i>
+                        Color Mode
+                    </h3>
+                    <select x-model="colorMode" @change="render()" 
+                            class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="mono">Monochrome</option>
+                        <option value="rainbow">Rainbow</option>
+                        <option value="gradient">Gradient</option>
+                        <option value="ocean">Ocean</option>
+                        <option value="fire">Fire</option>
+                    </select>
+                </div>
+
+                <!-- Stats Display -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-graph-up text-orange-500"></i>
+                        Statistics
+                    </h3>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                        <div>Lines drawn: <span class="font-semibold text-gray-800 dark:text-gray-200" x-text="lines.length"></span></div>
+                        <div>Pattern: <span class="font-semibold text-gray-800 dark:text-gray-200" x-text="pattern"></span></div>
+                        <div x-show="useDynamicThreshold" class="text-xs text-purple-600 dark:text-purple-400">
+                            Dynamic threshold: <span x-text="Math.floor(numPoints * thresholdMultiplier)"></span>
                         </div>
-
-                        <!-- Form with Validation -->
-                        <form @submit.prevent="addTask" class="space-y-3">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Add New Task
-                                </label>
-                                <input x-model="newTask.title" 
-                                       type="text" 
-                                       placeholder="Task title..."
-                                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-300"
-                                       :class="{'border-red-500': errors.title}">
-                                <div x-show="errors.title" class="text-red-500 text-sm mt-1" x-text="errors.title"></div>
-                            </div>
-                            
-                            <div>
-                                <select x-model="newTask.priority" 
-                                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-                                    <option value="">Select Priority</option>
-                                    <option value="high">High Priority</option>
-                                    <option value="medium">Medium Priority</option>
-                                    <option value="low">Low Priority</option>
-                                </select>
-                            </div>
-
-                            <button type="submit" 
-                                    class="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center justify-center gap-2 transition-colors duration-300">
-                                <i class="bi bi-plus-circle"></i>
-                                Add Task
-                            </button>
-                        </form>
-                    </section>
-
-                    <!-- 2. Conditional Display -->
-                    <section class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
-                        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
-                            <i class="bi bi-2-circle text-green-500"></i>
-                            Conditional Display (x-show, x-if)
-                        </h2>
-                        
-                        <div class="space-y-4">
-                            <div class="flex items-center gap-4">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" x-model="showAdvanced" class="w-4 h-4 text-blue-500">
-                                    <span class="text-gray-800 dark:text-gray-200">Show Advanced Options</span>
-                                </label>
-                            </div>
-
-                            <!-- x-show example (element stays in DOM) -->
-                            <div x-show="showAdvanced" 
-                                 x-transition 
-                                 class="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg transition-colors duration-300">
-                                <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">Advanced Settings (x-show)</h4>
-                                <p class="text-sm text-blue-700 dark:text-blue-400">This content is shown/hidden with x-show and stays in the DOM.</p>
-                                <button @click="copyToClipboard('Advanced settings accessed!')" 
-                                        class="mt-2 px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-colors duration-300">
-                                    Copy Status
-                                </button>
-                            </div>
-
-                            <!-- x-if example (element removed from DOM) -->
-                            <template x-if="tasks.length > 0">
-                                <div class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg transition-colors duration-300">
-                                    <h4 class="font-semibold text-green-800 dark:text-green-300 mb-2">Tasks Available (x-if)</h4>
-                                    <p class="text-sm text-green-700 dark:text-green-400">
-                                        This appears only when tasks exist and is completely removed from DOM when hidden.
-                                    </p>
-                                </div>
-                            </template>
-
-                            <template x-if="tasks.length === 0">
-                                <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg transition-colors duration-300">
-                                    <h4 class="font-semibold text-yellow-800 dark:text-yellow-300 mb-2">No Tasks Yet</h4>
-                                    <p class="text-sm text-yellow-700 dark:text-yellow-400">Add your first task above to see the x-if directive in action!</p>
-                                </div>
-                            </template>
+                        <div class="text-xs mt-2">
+                            <span x-show="useCoarseBinning" class="inline-block bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded mr-1">Coarse</span>
+                            <span x-show="useDynamicThreshold" class="inline-block bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded mr-1">Dynamic</span>
+                            <span x-show="useBlurring" class="inline-block bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 px-2 py-0.5 rounded mr-1">Blur</span>
                         </div>
-                    </section>
+                    </div>
+                </div>
+            </div>
 
-                    <!-- 3. File Upload -->
-                    <section class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
-                        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
-                            <i class="bi bi-3-circle text-purple-500"></i>
-                            File Upload & Processing
-                        </h2>
-                        
-                        <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300">
-                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                <i class="bi bi-cloud-upload text-4xl text-gray-400 dark:text-gray-500 mb-3"></i>
-                                <p class="mb-2 text-sm text-gray-700 dark:text-gray-300">
-                                    <span class="font-semibold">Click to upload</span> or drag and drop
-                                </p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">JSON files (task lists)</p>
-                            </div>
-                            <input type="file" 
-                                   class="hidden" 
-                                   accept=".json,.txt"
-                                   @change="handleFileUpload($event)" />
+            <!-- Advanced Optimization Options -->
+            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950 rounded-lg shadow-md p-6 mb-4 md:mb-6 transition-colors duration-300">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                    <i class="bi bi-gear text-indigo-500"></i>
+                    Advanced Optimization Options
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Option 1: Coarse Binning -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4">
+                        <label class="flex items-center gap-2 mb-3 cursor-pointer">
+                            <input type="checkbox" x-model="useCoarseBinning" @change="generate()" 
+                                   class="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500">
+                            <span class="font-semibold text-gray-800 dark:text-gray-100">Coarse Binning</span>
                         </label>
-
-                        <div x-show="uploadStatus" 
-                             class="mt-4 p-3 rounded-lg transition-colors duration-300"
-                             :class="uploadStatus.includes('Error') ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400' : 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400'">
-                            <p class="text-sm" x-text="uploadStatus"></p>
-                        </div>
-                    </section>
-                </div>
-
-                <!-- Right Column -->
-                <div class="space-y-6">
-                    <!-- 4. Lists & Loops with Computed Properties -->
-                    <section class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
-                        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
-                            <i class="bi bi-4-circle text-orange-500"></i>
-                            Lists & Loops (x-for) + Computed Properties
-                        </h2>
-
-                        <!-- Filter Controls -->
-                        <div class="mb-4">
-                            <div class="flex gap-2 mb-3">
-                                <button @click="filter = 'all'"
-                                        :class="filter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
-                                        class="px-3 py-1 rounded-lg text-sm transition-colors duration-300">
-                                    All (<span x-text="tasks.length"></span>)
-                                </button>
-                                <button @click="filter = 'pending'"
-                                        :class="filter === 'pending' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
-                                        class="px-3 py-1 rounded-lg text-sm transition-colors duration-300">
-                                    Pending (<span x-text="activeTasks"></span>)
-                                </button>
-                                <button @click="filter = 'completed'"
-                                        :class="filter === 'completed' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
-                                        class="px-3 py-1 rounded-lg text-sm transition-colors duration-300">
-                                    Done (<span x-text="completedTasks"></span>)
-                                </button>
-                            </div>
-
-                            <input x-model="searchTerm" 
-                                   type="text" 
-                                   placeholder="Search tasks..."
-                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-                        </div>
-
-                        <!-- Task List (x-for loop) -->
-                        <div class="space-y-2 max-h-64 overflow-y-auto">
-                            <template x-for="task in filteredTasks" :key="task.id">
-                                <div class="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-300"
-                                     :class="task.completed ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600'">
-                                    <input type="checkbox" 
-                                           x-model="task.completed" 
-                                           @change="saveToStorage()"
-                                           class="w-4 h-4 text-blue-500">
-                                    
-                                    <div class="flex-1">
-                                        <span :class="{'line-through text-gray-400 dark:text-gray-500': task.completed}" 
-                                              x-text="task.title"
-                                              class="block font-medium text-gray-800 dark:text-gray-200"></span>
-                                        <span class="text-xs text-gray-500 dark:text-gray-400" 
-                                              x-text="task.priority + ' priority'"></span>
-                                    </div>
-
-                                    <span class="text-xs px-2 py-1 rounded-full"
-                                          :class="{
-                                              'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400': task.priority === 'high',
-                                              'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400': task.priority === 'medium',
-                                              'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400': task.priority === 'low'
-                                          }"
-                                          x-text="task.priority"></span>
-
-                                    <button @click="removeTask(task.id)" 
-                                            class="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-1 transition-colors duration-300">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
-                            </template>
-
-                            <div x-show="filteredTasks.length === 0" 
-                                 class="text-center py-8 text-gray-400 dark:text-gray-500">
-                                <i class="bi bi-inbox text-3xl mb-2"></i>
-                                <p>No tasks match your current filter</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- 5. Statistics (Computed Properties) -->
-                    <section class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
-                        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
-                            <i class="bi bi-5-circle text-teal-500"></i>
-                            Statistics (Computed Properties)
-                        </h2>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg transition-colors duration-300">
-                                <div class="text-2xl font-bold text-blue-600 dark:text-blue-400" x-text="taskStats.total"></div>
-                                <div class="text-sm text-blue-700 dark:text-blue-300">Total Tasks</div>
-                            </div>
-                            <div class="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg transition-colors duration-300">
-                                <div class="text-2xl font-bold text-green-600 dark:text-green-400" x-text="taskStats.completed"></div>
-                                <div class="text-sm text-green-700 dark:text-green-300">Completed</div>
-                            </div>
-                            <div class="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg transition-colors duration-300">
-                                <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400" x-text="taskStats.pending"></div>
-                                <div class="text-sm text-yellow-700 dark:text-yellow-300">Pending</div>
-                            </div>
-                            <div class="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg transition-colors duration-300">
-                                <div class="text-2xl font-bold text-purple-600 dark:text-purple-400" x-text="completionPercentage + '%'"></div>
-                                <div class="text-sm text-purple-700 dark:text-purple-300">Complete</div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- 6. Local Storage Demo -->
-                    <section class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
-                        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
-                            <i class="bi bi-6-circle text-indigo-500"></i>
-                            Local Storage Persistence
-                        </h2>
-                        
-                        <div class="space-y-3">
-                            <p class="text-sm text-gray-600 dark:text-gray-400">
-                                Your tasks and theme preference are automatically saved to browser storage and will persist between sessions.
-                            </p>
-                            
-                            <div class="flex gap-2">
-                                <button @click="saveToStorage()" 
-                                        class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center gap-2 transition-colors duration-300">
-                                    <i class="bi bi-save"></i>
-                                    Save Now
-                                </button>
-                                <button @click="loadFromStorage()" 
-                                        class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2 transition-colors duration-300">
-                                    <i class="bi bi-arrow-clockwise"></i>
-                                    Reload
-                                </button>
-                            </div>
-
-                            <div x-show="lastSaved" class="text-xs text-gray-500 dark:text-gray-400">
-                                Last saved: <span x-text="lastSaved"></span>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- 7. Project Files Loader -->
-                    <section class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
-                        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
-                            <i class="bi bi-7-circle text-pink-500"></i>
-                            Project Files from Repository
-                        </h2>
-                        
-                        <div class="space-y-4">
-                            <p class="text-sm text-gray-600 dark:text-gray-400">
-                                Dynamically load markdown files from the <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">files/</code> directory using a manifest file.
-                            </p>
-
-                            <!-- Search Files -->
+                        <div x-show="useCoarseBinning" class="space-y-3 text-sm">
                             <div>
-                                <input 
-                                    type="text" 
-                                    x-model="fileSearchTerm"
-                                    placeholder="Search files..."
-                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors duration-300">
+                                <label class="text-gray-600 dark:text-gray-400">Theta Bin: <span x-text="thetaBinSize + '°'"></span></label>
+                                <input type="range" x-model.number="thetaBinSize" min="1" max="10" step="1"
+                                       @input="generate()" class="w-full">
                             </div>
-
-                            <!-- Loading State -->
-                            <div x-show="loadingFiles" class="text-center py-4">
-                                <i class="bi bi-hourglass-split text-pink-500 text-2xl animate-pulse"></i>
-                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Loading files...</p>
-                            </div>
-
-                            <!-- Error State -->
-                            <div x-show="filesError" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                                <p class="text-sm text-red-700 dark:text-red-400" x-text="filesError"></p>
-                                <button @click="loadFilesFromGitHub()" 
-                                        class="mt-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm">
-                                    Retry
-                                </button>
-                            </div>
-
-                            <!-- Files List -->
-                            <div x-show="!loadingFiles && !filesError" class="space-y-2 max-h-64 overflow-y-auto">
-                                <template x-if="filteredFiles.length === 0">
-                                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
-                                        <i class="bi bi-inbox text-3xl"></i>
-                                        <p class="text-sm mt-2">No files found</p>
-                                    </div>
-                                </template>
-                                
-                                <template x-for="file in filteredFiles" :key="file.id">
-                                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-300 cursor-pointer"
-                                         @click="viewFile(file)">
-                                        <div class="flex items-center gap-2">
-                                            <i class="bi bi-file-earmark-text text-pink-500"></i>
-                                            <span class="text-sm text-gray-800 dark:text-gray-200" x-text="file.name"></span>
-                                        </div>
-                                        <i class="bi bi-chevron-right text-gray-400"></i>
-                                    </div>
-                                </template>
-                            </div>
-
-                            <div class="flex gap-2">
-                                <button @click="loadFilesFromGitHub()" 
-                                        class="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600 flex items-center gap-2 transition-colors duration-300">
-                                    <i class="bi bi-arrow-clockwise"></i>
-                                    Refresh Files
-                                </button>
+                            <div>
+                                <label class="text-gray-600 dark:text-gray-400">Rho Bin: <span x-text="rhoBinSize + 'px'"></span></label>
+                                <input type="range" x-model.number="rhoBinSize" min="2" max="20" step="1"
+                                       @input="generate()" class="w-full">
                             </div>
                         </div>
-                    </section>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal Example (Proper Scrolling) -->
-        <div x-show="showModal" 
-             @click="showModal = false"
-             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-8 z-50">
-            <div @click.stop 
-                 class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl transition-colors duration-300" 
-                 style="height: 80vh">
-                
-                <!-- Fixed Header -->
-                <div class="bg-white dark:bg-gray-800 p-6 border-b border-gray-200 dark:border-gray-700 rounded-t-lg transition-colors duration-300">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">About This Alpine.js Demo</h3>
-                        <button @click="showModal = false" 
-                                class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-300">
-                            <i class="bi bi-x text-2xl"></i>
-                        </button>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            Groups similar lines together. Larger bins = more votes per bin.
+                        </p>
                     </div>
-                </div>
-                
-                <!-- Scrollable Content -->
-                <div class="bg-gray-50 dark:bg-gray-900 p-6 overflow-y-scroll transition-colors duration-300" 
-                     style="height: calc(80vh - 120px)">
                     
-                    <div class="prose max-w-none">
-                        <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Alpine.js Core Concepts Demonstrated</h4>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-300">
-                                <h5 class="font-semibold text-blue-600 dark:text-blue-400 mb-2">1. Reactive Data Binding</h5>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    Using <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded text-gray-800 dark:text-gray-200">x-model</code> for two-way binding and 
-                                    <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded text-gray-800 dark:text-gray-200">x-text</code> for displaying data.
-                                </p>
+                    <!-- Option 2: Dynamic Threshold -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4">
+                        <label class="flex items-center gap-2 mb-3 cursor-pointer">
+                            <input type="checkbox" x-model="useDynamicThreshold" @change="generate()" 
+                                   class="w-5 h-5 text-purple-600 rounded focus:ring-2 focus:ring-purple-500">
+                            <span class="font-semibold text-gray-800 dark:text-gray-100">Dynamic Threshold</span>
+                        </label>
+                        <div x-show="useDynamicThreshold" class="space-y-3 text-sm">
+                            <div>
+                                <label class="text-gray-600 dark:text-gray-400">Multiplier: <span x-text="(thresholdMultiplier * 100).toFixed(0) + '%'"></span></label>
+                                <input type="range" x-model.number="thresholdMultiplier" min="0.05" max="0.5" step="0.05"
+                                       @input="generate()" class="w-full">
                             </div>
-                            
-                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-300">
-                                <h5 class="font-semibold text-green-600 dark:text-green-400 mb-2">2. Event Handling</h5>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    Using <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded text-gray-800 dark:text-gray-200">@click</code>, 
-                                    <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded text-gray-800 dark:text-gray-200">@submit.prevent</code>, and 
-                                    <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded text-gray-800 dark:text-gray-200">@change</code> for user interactions.
-                                </p>
-                            </div>
-                            
-                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-300">
-                                <h5 class="font-semibold text-purple-600 dark:text-purple-400 mb-2">3. Conditional Display</h5>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    Using <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded text-gray-800 dark:text-gray-200">x-show</code> and 
-                                    <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded text-gray-800 dark:text-gray-200">x-if</code> for showing/hiding content.
-                                </p>
-                            </div>
-                            
-                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-300">
-                                <h5 class="font-semibold text-orange-600 dark:text-orange-400 mb-2">4. Lists & Loops</h5>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    Using <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded text-gray-800 dark:text-gray-200">x-for</code> to render dynamic lists 
-                                    with proper <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded text-gray-800 dark:text-gray-200">:key</code> attributes.
-                                </p>
-                            </div>
-                            
-                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-300">
-                                <h5 class="font-semibold text-teal-600 dark:text-teal-400 mb-2">5. Computed Properties</h5>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    Using getter functions for derived data that automatically updates when dependencies change.
-                                </p>
-                            </div>
-                            
-                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-300">
-                                <h5 class="font-semibold text-indigo-600 dark:text-indigo-400 mb-2">6. Local Storage</h5>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    Persistent data using browser localStorage with automatic save/load functionality.
-                                </p>
-                            </div>
-                            
-                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-300">
-                                <h5 class="font-semibold text-gray-600 dark:text-gray-400 mb-2">7. Dark Mode Toggle</h5>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    Accessibility-focused dark mode with system preference detection and localStorage persistence.
-                                </p>
-                            </div>
-                            
-                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-300">
-                                <h5 class="font-semibold text-pink-600 dark:text-pink-400 mb-2">8. Manifest File Loading</h5>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">
-                                    Dynamically load and display markdown files from a manifest (files.json), inspired by the recipe site pattern.
-                                </p>
+                            <div class="text-xs text-gray-600 dark:text-gray-300">
+                                Effective: <span x-text="Math.floor(numPoints * thresholdMultiplier)"></span> votes
                             </div>
                         </div>
-
-                        <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg transition-colors duration-300">
-                            <h5 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">🚀 Getting Started</h5>
-                            <ol class="text-sm text-blue-700 dark:text-blue-400 space-y-1 list-decimal list-inside">
-                                <li>Try toggling dark mode with the button in the header</li>
-                                <li>Add some tasks using the form in section 1</li>
-                                <li>Try the search and filter functionality</li>
-                                <li>Toggle the "Show Advanced Options" checkbox</li>
-                                <li>Upload a JSON file with task data</li>
-                                <li>Export your data and save it locally</li>
-                                <li>Refresh the page to see persistence in action</li>
-                                <li><strong>Click on files in section 7 to view markdown content from GitHub</strong></li>
-                                <li><strong>Visit the <a href="dark-mode-example.html" class="underline hover:text-blue-600 dark:hover:text-blue-400">Dark Mode Example</a> for detailed implementation guide</strong></li>
-                            </ol>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            Scales threshold based on number of points. More points = higher threshold.
+                        </p>
+                    </div>
+                    
+                    <!-- Option 3: Blurring/Averaging -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4">
+                        <label class="flex items-center gap-2 mb-3 cursor-pointer">
+                            <input type="checkbox" x-model="useBlurring" @change="generate()" 
+                                   class="w-5 h-5 text-pink-600 rounded focus:ring-2 focus:ring-pink-500">
+                            <span class="font-semibold text-gray-800 dark:text-gray-100">Vote Blurring</span>
+                        </label>
+                        <div x-show="useBlurring" class="space-y-3 text-sm">
+                            <div>
+                                <label class="text-gray-600 dark:text-gray-400">Blur Radius: <span x-text="blurRadius"></span></label>
+                                <input type="range" x-model.number="blurRadius" min="1" max="5" step="1"
+                                       @input="generate()" class="w-full">
+                            </div>
                         </div>
-
-                        <div class="mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg transition-colors duration-300">
-                            <h5 class="font-semibold text-green-800 dark:text-green-300 mb-2">📁 Single File Benefits</h5>
-                            <ul class="text-sm text-green-700 dark:text-green-400 space-y-1 list-disc list-inside">
-                                <li>No build process - just save and open</li>
-                                <li>Easy to share via email or file transfer</li>
-                                <li>Works offline after initial load</li>
-                                <li>Perfect for internal tools and utilities</li>
-                                <li>Version control friendly</li>
-                                <li>Built-in accessibility features like dark mode</li>
-                            </ul>
-                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            Spreads votes to neighboring bins. Helps similar lines accumulate votes.
+                        </p>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- File Viewer Modal -->
-        <div x-show="showFileModal" 
-             @click="showFileModal = false"
-             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-8 z-50">
-            <div @click.stop 
-                 class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl transition-colors duration-300" 
-                 style="height: 80vh">
-                
-                <!-- Fixed Header -->
-                <div class="bg-white dark:bg-gray-800 p-6 border-b border-gray-200 dark:border-gray-700 rounded-t-lg transition-colors duration-300">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100" x-text="selectedFile?.name"></h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                <i class="bi bi-file-earmark-text"></i>
-                                Loaded from repository
-                            </p>
-                        </div>
-                        <button @click="showFileModal = false" 
-                                class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-300">
-                            <i class="bi bi-x text-2xl"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Scrollable Content -->
-                <div class="bg-gray-50 dark:bg-gray-900 p-6 overflow-y-scroll transition-colors duration-300" 
-                     style="height: calc(80vh - 120px)">
-                    
-                    <!-- Rendered Markdown Content -->
-                    <div class="prose prose-sm max-w-none 
-                                prose-headings:text-gray-800 dark:prose-headings:text-gray-100
-                                prose-p:text-gray-700 dark:prose-p:text-gray-300
-                                prose-a:text-blue-600 dark:prose-a:text-blue-400
-                                prose-strong:text-gray-900 dark:prose-strong:text-gray-100
-                                prose-code:text-pink-600 dark:prose-code:text-pink-400
-                                prose-code:bg-gray-100 dark:prose-code:bg-gray-800
-                                prose-code:px-1 prose-code:py-0.5 prose-code:rounded
-                                prose-pre:bg-gray-800 dark:prose-pre:bg-gray-900
-                                prose-pre:text-gray-100
-                                prose-li:text-gray-700 dark:prose-li:text-gray-300
-                                prose-ul:text-gray-700 dark:prose-ul:text-gray-300
-                                prose-ol:text-gray-700 dark:prose-ol:text-gray-300"
-                         x-html="selectedFile?.html">
-                    </div>
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button @click="generate()" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 md:p-4 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Generate New Pattern
+                </button>
+                <button @click="randomize()" 
+                        class="w-full bg-purple-600 hover:bg-purple-700 text-white p-3 md:p-4 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors">
+                    <i class="bi bi-shuffle"></i>
+                    Randomize All
+                </button>
+                <button @click="download()" 
+                        class="w-full bg-green-600 hover:bg-green-700 text-white p-3 md:p-4 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors">
+                    <i class="bi bi-download"></i>
+                    Download PNG
+                </button>
+            </div>
+
+            <!-- Info Section -->
+            <div class="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
+                    <i class="bi bi-info-circle text-blue-500"></i>
+                    About Hough Waves
+                </h3>
+                <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                    Hough Waves use the <strong>Hough transform algorithm</strong> from computer vision to create stunning generative art. 
+                    Each point generates a sinusoidal curve in parameter space (θ, r), voting for all possible lines through it. 
+                    Lines receiving enough votes (above threshold) are drawn, creating emergent wave-like patterns. 
+                    Inspired by the 2004 art project by Andreas Schjønhaug & Kristoffer Stenersen at NTNU, Norway.
+                </p>
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs font-medium">Algorithm: Hough Transform</span>
+                    <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium">Alpine.js 3.x</span>
+                    <span class="px-3 py-1 bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 rounded-full text-xs font-medium">Generative Art</span>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        function starterApp() {
+        function houghWaves() {
             return {
                 // === STATE ===
-                userName: '',
-                newTask: { title: '', priority: '' },
-                tasks: [],
-                errors: {},
-                filter: 'all',
-                searchTerm: '',
-                showAdvanced: false,
-                showModal: false,
-                uploadStatus: '',
-                lastSaved: null,
+                numPoints: 50,
+                threshold: 15,
+                pattern: 'wave',
+                opacity: 0.05,
+                colorMode: 'mono',
+                lines: [],
                 darkMode: false,
+                canvas: null,
+                ctx: null,
+                thetaStep: 1, // Resolution of theta sampling (degrees)
                 
-                // File loading state
-                files: [],
-                loadingFiles: false,
-                filesError: null,
-                selectedFile: null,
-                showFileModal: false,
-                fileSearchTerm: '',
+                // === OPTIMIZATION OPTIONS ===
+                useCoarseBinning: false,
+                thetaBinSize: 1,  // Degrees per bin (when coarse binning enabled)
+                rhoBinSize: 2,    // Pixels per bin (when coarse binning enabled)
+                useDynamicThreshold: false,
+                thresholdMultiplier: 0.2,  // Percentage of points
+                useBlurring: false,
+                blurRadius: 1,    // Number of neighboring bins to blur into
 
-                // === COMPUTED PROPERTIES ===
-                get filteredTasks() {
-                    let filtered = this.tasks;
-                    
-                    // Apply status filter
-                    if (this.filter === 'pending') {
-                        filtered = filtered.filter(task => !task.completed);
-                    } else if (this.filter === 'completed') {
-                        filtered = filtered.filter(task => task.completed);
-                    }
-                    
-                    // Apply search filter
-                    if (this.searchTerm) {
-                        filtered = filtered.filter(task => 
-                            task.title.toLowerCase().includes(this.searchTerm.toLowerCase())
-                        );
-                    }
-                    
-                    return filtered;
-                },
-
-                get activeTasks() {
-                    return this.tasks.filter(task => !task.completed).length;
-                },
-
-                get completedTasks() {
-                    return this.tasks.filter(task => task.completed).length;
-                },
-
-                get taskStats() {
-                    return {
-                        total: this.tasks.length,
-                        completed: this.completedTasks,
-                        pending: this.activeTasks
-                    };
-                },
-
-                get completionPercentage() {
-                    if (this.tasks.length === 0) return 0;
-                    return Math.round((this.completedTasks / this.tasks.length) * 100);
-                },
-                
-                get filteredFiles() {
-                    if (!this.fileSearchTerm) return this.files;
-                    return this.files.filter(file => 
-                        file.name.toLowerCase().includes(this.fileSearchTerm.toLowerCase())
-                    );
-                },
-
-                // === METHODS ===
+                // === INITIALIZATION ===
                 init() {
-                    // Load saved data on startup
-                    this.loadFromStorage();
+                    this.canvas = this.$refs.canvas;
+                    this.ctx = this.canvas.getContext('2d');
                     
-                    // Load dark mode preference from localStorage
-                    const savedDarkMode = localStorage.getItem('alpine-starter-darkMode');
+                    // Load dark mode preference
+                    const savedDarkMode = localStorage.getItem('hough-waves-darkMode');
                     this.darkMode = savedDarkMode === 'true';
                     this.updateDarkMode();
                     
-                    // Add some sample data if none exists
-                    if (this.tasks.length === 0) {
-                        this.addSampleData();
-                    }
-                    
-                    // Load files from GitHub
-                    this.loadFilesFromGitHub();
+                    // Generate initial pattern
+                    this.generate();
                 },
 
+                // === DARK MODE ===
                 toggleDarkMode() {
                     this.darkMode = !this.darkMode;
                     this.updateDarkMode();
-                    localStorage.setItem('alpine-starter-darkMode', this.darkMode.toString());
+                    localStorage.setItem('hough-waves-darkMode', this.darkMode.toString());
+                    // Re-render with new theme colors
+                    this.render();
                 },
 
                 updateDarkMode() {
@@ -697,236 +337,222 @@
                     }
                 },
 
-                addSampleData() {
-                    this.tasks = [
-                        { id: 1, title: 'Learn Alpine.js basics', priority: 'high', completed: true },
-                        { id: 2, title: 'Build a todo app', priority: 'medium', completed: false },
-                        { id: 3, title: 'Add file upload feature', priority: 'low', completed: false },
-                        { id: 4, title: 'Implement local storage', priority: 'medium', completed: true }
-                    ];
-                    this.saveToStorage();
+                // === MAIN GENERATION ===
+                generate() {
+                    this.clear();
+                    const points = this.createPoints();
+                    this.lines = this.computeHoughTransform(points);
+                    this.render();
                 },
 
-                validateTask() {
-                    this.errors = {};
+                // === POINT GENERATION ===
+                createPoints() {
+                    const points = [];
+                    const n = parseInt(this.numPoints);
+                    const w = this.canvas.width;
+                    const h = this.canvas.height;
                     
-                    if (!this.newTask.title.trim()) {
-                        this.errors.title = 'Task title is required';
-                    }
-                    
-                    return Object.keys(this.errors).length === 0;
-                },
-
-                addTask() {
-                    if (!this.validateTask()) return;
-                    
-                    const task = {
-                        id: Date.now(),
-                        title: this.newTask.title.trim(),
-                        priority: this.newTask.priority || 'medium',
-                        completed: false
+                    const patterns = {
+                        wave: (i) => ({
+                            x: (i/n) * w,
+                            y: h/2 + Math.sin(i/n * Math.PI * 4) * 150
+                        }),
+                        spiral: (i) => {
+                            const angle = (i/n) * Math.PI * 6;
+                            const radius = (i/n) * Math.min(w, h) * 0.4;
+                            return {
+                                x: w/2 + Math.cos(angle) * radius,
+                                y: h/2 + Math.sin(angle) * radius
+                            };
+                        },
+                        circle: (i) => {
+                            const angle = (i/n) * Math.PI * 2;
+                            const radius = Math.min(w, h) * 0.3;
+                            return {
+                                x: w/2 + Math.cos(angle) * radius,
+                                y: h/2 + Math.sin(angle) * radius
+                            };
+                        },
+                        grid: (i) => {
+                            const cols = Math.ceil(Math.sqrt(n));
+                            return {
+                                x: ((i % cols) / cols) * w,
+                                y: (Math.floor(i / cols) / cols) * h
+                            };
+                        },
+                        random: (i) => ({
+                            x: Math.random() * w,
+                            y: Math.random() * h
+                        })
                     };
                     
-                    this.tasks.push(task);
-                    this.newTask = { title: '', priority: '' };
-                    this.saveToStorage();
-                },
-
-                removeTask(id) {
-                    this.tasks = this.tasks.filter(task => task.id !== id);
-                    this.saveToStorage();
-                },
-
-                async handleFileUpload(event) {
-                    const file = event.target.files[0];
-                    if (!file) return;
+                    for (let i = 0; i < n; i++) {
+                        const point = patterns[this.pattern](i);
+                        // Add slight noise for organic feel (except for random pattern)
+                        if (this.pattern !== 'random') {
+                            point.x += (Math.random() - 0.5) * 20;
+                            point.y += (Math.random() - 0.5) * 20;
+                        }
+                        points.push(point);
+                    }
                     
-                    try {
-                        const text = await file.text();
-                        
-                        if (file.name.endsWith('.json')) {
-                            const data = JSON.parse(text);
+                    return points;
+                },
+
+                // === HOUGH TRANSFORM ===
+                computeHoughTransform(points) {
+                    const accumulator = new Map();
+                    const lines = [];
+                    const w = this.canvas.width;
+                    const h = this.canvas.height;
+                    const maxRho = Math.sqrt(w * w + h * h);
+                    
+                    // Determine binning sizes (Option 1: Coarse Binning)
+                    const thetaBinSize = this.useCoarseBinning ? this.thetaBinSize : 1;
+                    const rhoBinSize = this.useCoarseBinning ? this.rhoBinSize : 2;
+                    
+                    // Helper function to cast a vote (with optional blurring)
+                    const castVote = (thetaKey, rhoKey, weight = 1) => {
+                        const key = `${thetaKey},${rhoKey}`;
+                        const count = (accumulator.get(key) || 0) + weight;
+                        accumulator.set(key, count);
+                    };
+                    
+                    // For each point, vote for all possible lines through it
+                    points.forEach(point => {
+                        // Vary theta from -90 to +90 degrees
+                        for (let thetaDeg = -90; thetaDeg <= 90; thetaDeg += this.thetaStep) {
+                            const theta = thetaDeg * Math.PI / 180;
                             
-                            // Validate the structure
-                            if (Array.isArray(data) && data.every(item => 
-                                item.hasOwnProperty('title') && 
-                                item.hasOwnProperty('completed')
-                            )) {
-                                // Add IDs if missing and merge with existing tasks
-                                const newTasks = data.map(task => ({
-                                    id: task.id || Date.now() + Math.random(),
-                                    title: task.title,
-                                    priority: task.priority || 'medium',
-                                    completed: task.completed || false
-                                }));
-                                
-                                this.tasks = [...this.tasks, ...newTasks];
-                                this.uploadStatus = `Successfully imported ${newTasks.length} tasks from ${file.name}`;
-                                this.saveToStorage();
+                            // Calculate r = x*cos(θ) + y*sin(θ)
+                            const rho = point.x * Math.cos(theta) + point.y * Math.sin(theta);
+                            
+                            // Quantize theta and rho for binning
+                            const thetaKey = Math.round(thetaDeg / thetaBinSize) * thetaBinSize;
+                            const rhoKey = Math.round(rho / rhoBinSize) * rhoBinSize;
+                            
+                            // Cast primary vote
+                            castVote(thetaKey, rhoKey, 1.0);
+                            
+                            // Option 3: Vote Blurring - spread vote to neighboring bins
+                            if (this.useBlurring) {
+                                const radius = this.blurRadius;
+                                for (let dt = -radius; dt <= radius; dt++) {
+                                    for (let dr = -radius; dr <= radius; dr++) {
+                                        if (dt === 0 && dr === 0) continue; // Skip center (already voted)
+                                        
+                                        const neighborTheta = thetaKey + (dt * thetaBinSize);
+                                        const neighborRho = rhoKey + (dr * rhoBinSize);
+                                        
+                                        // Gaussian-like weight: closer neighbors get more weight
+                                        const distance = Math.sqrt(dt * dt + dr * dr);
+                                        const weight = Math.exp(-distance * distance / (2 * radius * radius)) * 0.5;
+                                        
+                                        castVote(neighborTheta, neighborRho, weight);
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Option 2: Dynamic Threshold - scale based on number of points
+                    const threshold = this.useDynamicThreshold 
+                        ? Math.max(5, Math.floor(points.length * this.thresholdMultiplier))
+                        : parseInt(this.threshold);
+                    
+                    // Find lines that exceed threshold
+                    accumulator.forEach((votes, key) => {
+                        if (votes >= threshold) {
+                            const [thetaKey, rhoKey] = key.split(',').map(Number);
+                            const theta = thetaKey * Math.PI / 180;
+                            const rho = rhoKey;
+                            lines.push({ theta, rho, strength: votes });
+                        }
+                    });
+                    
+                    // Sort by strength for better rendering
+                    lines.sort((a, b) => a.strength - b.strength);
+                    
+                    return lines;
+                },
+
+                // === RENDERING ===
+                render() {
+                    this.clear();
+                    this.lines.forEach((line, idx) => {
+                        this.drawLine(
+                            line.theta, 
+                            line.rho, 
+                            this.getColor(idx, this.lines.length),
+                            line.strength
+                        );
+                    });
+                },
+
+                drawLine(theta, rho, color, strength) {
+                    const cos = Math.cos(theta);
+                    const sin = Math.sin(theta);
+                    
+                    let x0 = cos * rho;
+                    let y0 = sin * rho;
+                    
+                    let x1 = x0 - sin * 1000;
+                    let y1 = y0 + cos * 1000;
+                    let x2 = x0 + sin * 1000;
+                    let y2 = y0 - cos * 1000;
+                    
+                    this.ctx.strokeStyle = color;
+                    this.ctx.globalAlpha = parseFloat(this.opacity) * Math.min(1, strength / 10);
+                    this.ctx.lineWidth = 0.5;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x1, y1);
+                    this.ctx.lineTo(x2, y2);
+                    this.ctx.stroke();
+                    this.ctx.globalAlpha = 1;
+                },
+
+                // === COLOR MODES ===
+                getColor(index, total) {
+                    const modes = {
+                        mono: () => this.darkMode ? '#ffffff' : '#000000',
+                        rainbow: () => `hsl(${(index/total) * 360}, 70%, ${this.darkMode ? 60 : 40}%)`,
+                        gradient: () => {
+                            const t = index / total;
+                            if (this.darkMode) {
+                                return `rgb(${255*t}, ${255*(1-t)}, 255)`;
                             } else {
-                                this.uploadStatus = 'Error: Invalid task data format in JSON file';
+                                return `rgb(${200*t}, ${200*(1-t)}, 200)`;
                             }
-                        } else {
-                            this.uploadStatus = 'Error: Please upload a JSON file';
-                        }
-                    } catch (error) {
-                        this.uploadStatus = `Error: Could not parse file - ${error.message}`;
-                    }
+                        },
+                        ocean: () => `hsl(${180 + (index/total) * 60}, 70%, ${this.darkMode ? 60 : 40}%)`,
+                        fire: () => `hsl(${(index/total) * 60}, 80%, ${this.darkMode ? 60 : 40}%)`
+                    };
                     
-                    // Clear status after 5 seconds
-                    setTimeout(() => {
-                        this.uploadStatus = '';
-                    }, 5000);
-                    
-                    // Clear the file input
-                    event.target.value = '';
+                    return modes[this.colorMode]();
                 },
 
-                exportData() {
-                    const dataStr = JSON.stringify(this.tasks, null, 2);
-                    const blob = new Blob([dataStr], { type: 'application/json' });
-                    const url = URL.createObjectURL(blob);
-                    
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `alpine-tasks-${new Date().toISOString().split('T')[0]}.json`;
-                    a.click();
-                    
-                    URL.revokeObjectURL(url);
+                // === UTILITIES ===
+                clear() {
+                    // Use light background in light mode, dark in dark mode
+                    this.ctx.fillStyle = this.darkMode ? '#000000' : '#ffffff';
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
                 },
 
-                async copyToClipboard(text) {
-                    try {
-                        await navigator.clipboard.writeText(text);
-                        alert('Copied to clipboard!');
-                    } catch (err) {
-                        // Fallback for older browsers
-                        const textarea = document.createElement('textarea');
-                        textarea.value = text;
-                        textarea.style.position = 'fixed';
-                        textarea.style.opacity = '0';
-                        document.body.appendChild(textarea);
-                        textarea.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(textarea);
-                        alert('Copied to clipboard!');
-                    }
+                download() {
+                    const link = document.createElement('a');
+                    link.download = `hough-waves-${Date.now()}.png`;
+                    link.href = this.canvas.toDataURL();
+                    link.click();
                 },
 
-                saveToStorage() {
-                    localStorage.setItem('alpine-starter-tasks', JSON.stringify(this.tasks));
-                    localStorage.setItem('alpine-starter-user', this.userName);
-                    localStorage.setItem('alpine-starter-darkMode', this.darkMode.toString());
-                    this.lastSaved = new Date().toLocaleTimeString();
-                },
-
-                loadFromStorage() {
-                    const savedTasks = localStorage.getItem('alpine-starter-tasks');
-                    const savedUser = localStorage.getItem('alpine-starter-user');
-                    const savedDarkMode = localStorage.getItem('alpine-starter-darkMode');
-                    
-                    if (savedTasks) {
-                        try {
-                            this.tasks = JSON.parse(savedTasks);
-                        } catch (error) {
-                            console.error('Error parsing saved tasks:', error);
-                        }
-                    }
-                    
-                    if (savedUser) {
-                        this.userName = savedUser;
-                    }
-                    
-                    if (savedDarkMode) {
-                        this.darkMode = savedDarkMode === 'true';
-                    }
-                },
-
-                clearAllData() {
-                    if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
-                        this.tasks = [];
-                        this.userName = '';
-                        this.newTask = { title: '', priority: '' };
-                        this.filter = 'all';
-                        this.searchTerm = '';
-                        this.showAdvanced = false;
-                        localStorage.removeItem('alpine-starter-tasks');
-                        localStorage.removeItem('alpine-starter-user');
-                        // Keep dark mode preference when clearing data
-                        this.lastSaved = null;
-                    }
-                },
-                
-                // === FILE LOADING METHODS ===
-                async loadFilesFromGitHub() {
-                    this.loadingFiles = true;
-                    this.filesError = null;
-                    
-                    try {
-                        // Load file list from manifest (like recipe site pattern)
-                        let fileList = [];
-                        try {
-                            const manifestResponse = await fetch('files.json');
-                            if (manifestResponse.ok) {
-                                fileList = await manifestResponse.json();
-                            }
-                        } catch (error) {
-                            console.warn('Could not load files manifest, using fallback list:', error);
-                            // Fallback to known files if manifest fails
-                            fileList = [
-                                'example-01.md',
-                                'example-02.md',
-                                'example-03.md'
-                            ];
-                        }
-                        
-                        // Map filenames to file objects
-                        this.files = fileList
-                            .filter(filename => filename.endsWith('.md'))
-                            .map(filename => ({
-                                name: filename,
-                                path: `files/${filename}`,
-                                id: filename.replace('.md', '')
-                            }));
-                        
-                    } catch (error) {
-                        console.error('Error loading files:', error);
-                        this.filesError = error.message;
-                    } finally {
-                        this.loadingFiles = false;
-                    }
-                },
-                
-                async viewFile(file) {
-                    this.loadingFiles = true;
-                    
-                    try {
-                        // Fetch markdown file from files/ directory
-                        const response = await fetch(file.path);
-                        
-                        if (!response.ok) {
-                            throw new Error('Failed to load file content');
-                        }
-                        
-                        const markdown = await response.text();
-                        
-                        // Parse markdown to HTML using marked.js
-                        const htmlContent = marked.parse(markdown);
-                        
-                        this.selectedFile = {
-                            ...file,
-                            markdown: markdown,
-                            html: htmlContent
-                        };
-                        
-                        this.showFileModal = true;
-                        
-                    } catch (error) {
-                        console.error('Error loading file content:', error);
-                        alert('Failed to load file: ' + error.message);
-                    } finally {
-                        this.loadingFiles = false;
-                    }
+                randomize() {
+                    this.numPoints = 20 + Math.floor(Math.random() * 100);
+                    this.threshold = 10 + Math.floor(Math.random() * 30);
+                    this.opacity = 0.02 + Math.random() * 0.3; // Range from 2% to 32%
+                    this.thetaStep = 0.5 + Math.random() * 2.5;
+                    this.pattern = ['wave', 'spiral', 'circle', 'grid', 'random'][Math.floor(Math.random() * 5)];
+                    this.colorMode = ['mono', 'rainbow', 'gradient', 'ocean', 'fire'][Math.floor(Math.random() * 5)];
+                    this.generate();
                 }
             }
         }
@@ -946,8 +572,8 @@
 
         // Dynamically created manifest
         const manifest = {
-            name: 'Alpine.js Starter Demo',
-            short_name: 'Alpine Demo',
+            name: 'Hough Waves - Algorithmic Art',
+            short_name: 'Hough Waves',
             display: 'standalone',
             theme_color: '#3b82f6',
             background_color: '#f9fafb',
