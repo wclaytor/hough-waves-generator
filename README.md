@@ -7,6 +7,7 @@ Transform mathematical algorithms into stunning visual art using the Hough trans
 [![Art](https://img.shields.io/badge/Art-Generative-FF6B6B)](https://github.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.md)
 
+[GitHub Pages Live Preview](https://wclaytor.github.io/hough-waves-generator/index.html)
 
 ## 🎨 What Are Hough Waves?
 
