@@ -90,9 +90,9 @@ This template provides all available settings with example values. Use this as a
 
 #### Blur Radius
 **Setting**: `blurRadius`  
-**Type**: Range (1-5)  
+**Type**: Range (0.1-5)  
 **Unit**: Bins  
-**Example**: `1`  
+**Example**: `0.1`  
 **Description**: Number of neighboring bins to blur into (only active when Vote Blurring is enabled)  
 **Note**: Larger radius = more vote spreading
 
@@ -226,7 +226,7 @@ rhoBinSize: 2
 useDynamicThreshold: false
 thresholdMultiplier: 0.2
 useBlurring: false
-blurRadius: 1
+blurRadius: 0.1
 darkMode: false (or loaded from localStorage)
 ```
 

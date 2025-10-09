@@ -357,7 +357,7 @@ rhoBinSize: 2         // Coarse binning rho size
 useDynamicThreshold: false
 thresholdMultiplier: 0.2
 useBlurring: false
-blurRadius: 1
+blurRadius: 0.1
 ```
 
 **Core Methods**:
