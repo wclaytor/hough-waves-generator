@@ -13,7 +13,7 @@ This template provides all available settings with example values. Use this as a
 
 #### Wave Pattern Parameters
 **Setting**: `waveFrequency`  
-**Type**: Range (1-10)  
+**Type**: Range (0.1-10)  
 **Example**: `4`  
 **Description**: Number of wave cycles across the canvas  
 **Note**: Only applies when pattern is `wave`
