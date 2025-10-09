@@ -10,7 +10,7 @@ circleRadius: 0.3
 numPoints: 120
 threshold: 7
 thetaStep: 0.5
-opacity: 65
+opacity: 0.5
 colorMode: rainbow
 useCoarseBinning: true
 thetaBinSize: 2

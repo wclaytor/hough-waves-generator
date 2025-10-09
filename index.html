@@ -837,19 +837,23 @@
                     markdown += `## Settings\n\n`;
                     markdown += `\`\`\`\n`;
                     markdown += `pattern: ${this.pattern}\n`;
+                    
+                    // Include pattern-specific parameters immediately after pattern
+                    if (this.pattern === 'wave') {
+                        markdown += `waveFrequency: ${this.waveFrequency}\n`;
+                        markdown += `waveAmplitude: ${this.waveAmplitude}\n`;
+                    } else if (this.pattern === 'spiral') {
+                        markdown += `spiralRotations: ${this.spiralRotations}\n`;
+                        markdown += `spiralRadius: ${this.spiralRadius}\n`;
+                    } else if (this.pattern === 'circle') {
+                        markdown += `circleRadius: ${this.circleRadius}\n`;
+                    }
+                    
                     markdown += `numPoints: ${this.numPoints}\n`;
                     markdown += `threshold: ${this.threshold}\n`;
                     markdown += `thetaStep: ${this.thetaStep}\n`;
                     markdown += `opacity: ${this.opacity}\n`;
                     markdown += `colorMode: ${this.colorMode}\n`;
-                    
-                    // Include all pattern-specific parameters
-                    markdown += `waveFrequency: ${this.waveFrequency}\n`;
-                    markdown += `waveAmplitude: ${this.waveAmplitude}\n`;
-                    markdown += `spiralRotations: ${this.spiralRotations}\n`;
-                    markdown += `spiralRadius: ${this.spiralRadius}\n`;
-                    markdown += `circleRadius: ${this.circleRadius}\n`;
-                    
                     markdown += `useCoarseBinning: ${this.useCoarseBinning}\n`;
                     
                     // Only include coarse binning settings if enabled
@@ -903,19 +907,23 @@
                     markdown += `## Settings\n\n`;
                     markdown += `\`\`\`\n`;
                     markdown += `pattern: ${this.pattern}\n`;
+                    
+                    // Include pattern-specific parameters immediately after pattern
+                    if (this.pattern === 'wave') {
+                        markdown += `waveFrequency: ${this.waveFrequency}\n`;
+                        markdown += `waveAmplitude: ${this.waveAmplitude}\n`;
+                    } else if (this.pattern === 'spiral') {
+                        markdown += `spiralRotations: ${this.spiralRotations}\n`;
+                        markdown += `spiralRadius: ${this.spiralRadius}\n`;
+                    } else if (this.pattern === 'circle') {
+                        markdown += `circleRadius: ${this.circleRadius}\n`;
+                    }
+                    
                     markdown += `numPoints: ${this.numPoints}\n`;
                     markdown += `threshold: ${this.threshold}\n`;
                     markdown += `thetaStep: ${this.thetaStep}\n`;
                     markdown += `opacity: ${this.opacity}\n`;
                     markdown += `colorMode: ${this.colorMode}\n`;
-                    
-                    // Include all pattern-specific parameters
-                    markdown += `waveFrequency: ${this.waveFrequency}\n`;
-                    markdown += `waveAmplitude: ${this.waveAmplitude}\n`;
-                    markdown += `spiralRotations: ${this.spiralRotations}\n`;
-                    markdown += `spiralRadius: ${this.spiralRadius}\n`;
-                    markdown += `circleRadius: ${this.circleRadius}\n`;
-                    
                     markdown += `useCoarseBinning: ${this.useCoarseBinning}\n`;
                     
                     // Only include coarse binning settings if enabled

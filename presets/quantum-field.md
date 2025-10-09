@@ -9,7 +9,7 @@ pattern: random
 numPoints: 150
 threshold: 5
 thetaStep: 1
-opacity: 50
+opacity: 0.4
 colorMode: gradient
 useCoarseBinning: true
 thetaBinSize: 3

@@ -11,7 +11,7 @@ waveAmplitude: 150
 numPoints: 45
 threshold: 7
 thetaStep: 0.5
-opacity: 58
+opacity: 0.4
 colorMode: gradient
 useCoarseBinning: false
 useDynamicThreshold: false
