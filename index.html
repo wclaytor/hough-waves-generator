@@ -105,6 +105,66 @@
                     </select>
                 </div>
 
+                <!-- Wave Pattern Parameters -->
+                <div x-show="pattern === 'wave'" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-tsunami text-purple-500"></i>
+                        Wave Parameters
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-gray-600 dark:text-gray-400 text-sm">Frequency: <span class="font-semibold" x-text="waveFrequency"></span></label>
+                            <input type="range" x-model.number="waveFrequency" min="1" max="10" step="0.5"
+                                   @input="generate()" class="w-full">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Number of wave cycles across the canvas</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 dark:text-gray-400 text-sm">Amplitude: <span class="font-semibold" x-text="waveAmplitude + 'px'"></span></label>
+                            <input type="range" x-model.number="waveAmplitude" min="50" max="250" step="10"
+                                   @input="generate()" class="w-full">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Height of the wave peaks</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spiral Pattern Parameters -->
+                <div x-show="pattern === 'spiral'" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-arrow-clockwise text-purple-500"></i>
+                        Spiral Parameters
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-gray-600 dark:text-gray-400 text-sm">Rotations: <span class="font-semibold" x-text="spiralRotations"></span></label>
+                            <input type="range" x-model.number="spiralRotations" min="1" max="10" step="0.5"
+                                   @input="generate()" class="w-full">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Number of complete rotations in the spiral</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 dark:text-gray-400 text-sm">Radius: <span class="font-semibold" x-text="(spiralRadius * 100).toFixed(0) + '%'"></span></label>
+                            <input type="range" x-model.number="spiralRadius" min="0.2" max="0.5" step="0.05"
+                                   @input="generate()" class="w-full">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Size of the spiral relative to canvas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Circle Pattern Parameters -->
+                <div x-show="pattern === 'circle'" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-circle text-purple-500"></i>
+                        Circle Parameters
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-gray-600 dark:text-gray-400 text-sm">Radius: <span class="font-semibold" x-text="(circleRadius * 100).toFixed(0) + '%'"></span></label>
+                            <input type="range" x-model.number="circleRadius" min="0.1" max="0.5" step="0.05"
+                                   @input="generate()" class="w-full">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Size of the circle relative to canvas</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Points Control -->
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
                     <div class="mb-4 flex items-center justify-between">
@@ -400,6 +460,18 @@
                 ctx: null,
                 thetaStep: 1, // Resolution of theta sampling (degrees)
                 
+                // === PATTERN-SPECIFIC PARAMETERS ===
+                // Wave pattern
+                waveFrequency: 4,    // Number of wave cycles (1-10)
+                waveAmplitude: 150,  // Wave height in pixels (50-250)
+                
+                // Spiral pattern
+                spiralRotations: 6,  // Number of rotations (1-10)
+                spiralRadius: 0.4,   // Radius multiplier (0.2-0.5)
+                
+                // Circle pattern
+                circleRadius: 0.3,   // Radius multiplier (0.1-0.5)
+                
                 // === OPTIMIZATION OPTIONS ===
                 useCoarseBinning: false,
                 thetaBinSize: 1,  // Degrees per bin (when coarse binning enabled)
@@ -542,11 +614,11 @@
                     const patterns = {
                         wave: (i) => ({
                             x: (i/n) * w,
-                            y: h/2 + Math.sin(i/n * Math.PI * 4) * 150
+                            y: h/2 + Math.sin(i/n * Math.PI * this.waveFrequency) * this.waveAmplitude
                         }),
                         spiral: (i) => {
-                            const angle = (i/n) * Math.PI * 6;
-                            const radius = (i/n) * Math.min(w, h) * 0.4;
+                            const angle = (i/n) * Math.PI * this.spiralRotations;
+                            const radius = (i/n) * Math.min(w, h) * this.spiralRadius;
                             return {
                                 x: w/2 + Math.cos(angle) * radius,
                                 y: h/2 + Math.sin(angle) * radius
@@ -554,7 +626,7 @@
                         },
                         circle: (i) => {
                             const angle = (i/n) * Math.PI * 2;
-                            const radius = Math.min(w, h) * 0.3;
+                            const radius = Math.min(w, h) * this.circleRadius;
                             return {
                                 x: w/2 + Math.cos(angle) * radius,
                                 y: h/2 + Math.sin(angle) * radius
