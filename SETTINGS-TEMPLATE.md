@@ -19,7 +19,7 @@ This template provides all available settings with example values. Use this as a
 **Note**: Only applies when pattern is `wave`
 
 **Setting**: `waveAmplitude`  
-**Type**: Range (50-250)  
+**Type**: Range (1-250)  
 **Unit**: Pixels (px)  
 **Example**: `150`  
 **Description**: Height of the wave peaks  

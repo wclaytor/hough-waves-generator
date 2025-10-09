@@ -134,7 +134,7 @@
                         </div>
                         <div>
                             <label class="text-gray-600 dark:text-gray-400 text-sm">Amplitude: <span class="font-semibold" x-text="waveAmplitude + 'px'"></span></label>
-                            <input type="range" x-model.number="waveAmplitude" min="50" max="250" step="10"
+                            <input type="range" x-model.number="waveAmplitude" min="1" max="250" step="1"
                                    @input="generate()" class="w-full">
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Height of the wave peaks</p>
                         </div>
@@ -488,7 +488,7 @@
                 // === PATTERN-SPECIFIC PARAMETERS ===
                 // Wave pattern
                 waveFrequency: 4,    // Number of wave cycles (0.1-10)
-                waveAmplitude: 150,  // Wave height in pixels (50-250)
+                waveAmplitude: 150,  // Wave height in pixels (1-250)
                 
                 // Spiral pattern
                 spiralRotations: 6,  // Number of rotations (1-10)
@@ -991,7 +991,7 @@
                     
                     // Randomize pattern-specific parameters
                     this.waveFrequency = 0.1 + Math.random() * 9.9; // 0.1-10
-                    this.waveAmplitude = 50 + Math.floor(Math.random() * 200); // 50-250
+                    this.waveAmplitude = 1 + Math.floor(Math.random() * 250); // 1-250
                     this.spiralRotations = 1 + Math.random() * 9; // 1-10
                     this.spiralRadius = 0.2 + Math.random() * 0.3; // 0.2-0.5
                     this.circleRadius = 0.1 + Math.random() * 0.4; // 0.1-0.5
