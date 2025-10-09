@@ -292,6 +292,16 @@
                         <option value="gradient">Gradient</option>
                         <option value="ocean">Ocean</option>
                         <option value="fire">Fire</option>
+                        <option value="sunset">Sunset</option>
+                        <option value="forest">Forest</option>
+                        <option value="neon">Neon</option>
+                        <option value="pastel">Pastel</option>
+                        <option value="midnight">Midnight</option>
+                        <option value="autumn">Autumn</option>
+                        <option value="spring">Spring</option>
+                        <option value="galaxy">Galaxy</option>
+                        <option value="lava">Lava</option>
+                        <option value="arctic">Arctic</option>
                     </select>
                 </div>
 
@@ -809,7 +819,17 @@
                             }
                         },
                         ocean: () => `hsl(${180 + (index/total) * 60}, 70%, ${this.darkMode ? 60 : 40}%)`,
-                        fire: () => `hsl(${(index/total) * 60}, 80%, ${this.darkMode ? 60 : 40}%)`
+                        fire: () => `hsl(${(index/total) * 60}, 80%, ${this.darkMode ? 60 : 40}%)`,
+                        sunset: () => `hsl(${(index/total) * 60 + 320}, 85%, ${this.darkMode ? 65 : 50}%)`,
+                        forest: () => `hsl(${(index/total) * 60 + 80}, 60%, ${this.darkMode ? 50 : 35}%)`,
+                        neon: () => `hsl(${(index/total) * 360}, 100%, ${this.darkMode ? 70 : 50}%)`,
+                        pastel: () => `hsl(${(index/total) * 360}, 60%, ${this.darkMode ? 75 : 80}%)`,
+                        midnight: () => `hsl(${220 + (index/total) * 80}, 70%, ${this.darkMode ? 50 : 30}%)`,
+                        autumn: () => `hsl(${(index/total) * 60 + 10}, 75%, ${this.darkMode ? 55 : 45}%)`,
+                        spring: () => `hsl(${(index/total) * 90 + 60}, 70%, ${this.darkMode ? 60 : 50}%)`,
+                        galaxy: () => `hsl(${(index/total) * 100 + 260}, 80%, ${this.darkMode ? 65 : 45}%)`,
+                        lava: () => `hsl(${(index/total) * 40}, 90%, ${this.darkMode ? 50 : 40}%)`,
+                        arctic: () => `hsl(${180 + (index/total) * 40}, 50%, ${this.darkMode ? 70 : 75}%)`
                     };
                     
                     return modes[this.colorMode]();
@@ -967,7 +987,7 @@
                     this.opacity = 0.02 + Math.random() * 0.3; // Range from 2% to 32%
                     this.thetaStep = 0.5 + Math.random() * 2.5;
                     this.pattern = ['wave', 'spiral', 'circle', 'grid', 'random'][Math.floor(Math.random() * 5)];
-                    this.colorMode = ['mono', 'rainbow', 'gradient', 'ocean', 'fire'][Math.floor(Math.random() * 5)];
+                    this.colorMode = ['mono', 'rainbow', 'gradient', 'ocean', 'fire', 'sunset', 'forest', 'neon', 'pastel', 'midnight', 'autumn', 'spring', 'galaxy', 'lava', 'arctic'][Math.floor(Math.random() * 15)];
                     
                     // Randomize pattern-specific parameters
                     this.waveFrequency = 1 + Math.random() * 9; // 1-10

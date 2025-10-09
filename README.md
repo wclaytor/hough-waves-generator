@@ -152,6 +152,16 @@ Determines line coloring strategy:
 - **Gradient**: Purple-to-pink color transition
 - **Ocean**: Blue-teal atmospheric tones
 - **Fire**: Red-orange-yellow flame colors
+- **Sunset**: Warm oranges, pinks, and purples
+- **Forest**: Greens and earth tones
+- **Neon**: Vibrant electric colors
+- **Pastel**: Soft, muted colors
+- **Midnight**: Deep blues and purples
+- **Autumn**: Warm reds, oranges, and browns
+- **Spring**: Fresh greens and yellows
+- **Galaxy**: Purples, blues, and pinks
+- **Lava**: Deep reds and oranges
+- **Arctic**: Cool blues and whites
 
 ### Advanced Optimization Options
 

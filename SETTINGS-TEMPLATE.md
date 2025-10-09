@@ -76,7 +76,7 @@ This template provides all available settings with example values. Use this as a
 ### Color Mode
 **Setting**: `colorMode`  
 **Type**: Selection  
-**Options**: `mono`, `rainbow`, `gradient`, `ocean`, `fire`  
+**Options**: `mono`, `rainbow`, `gradient`, `ocean`, `fire`, `sunset`, `forest`, `neon`, `pastel`, `midnight`, `autumn`, `spring`, `galaxy`, `lava`, `arctic`  
 **Example**: `mono`  
 **Description**: Determines line coloring strategy
 
