@@ -13,6 +13,9 @@ opacity: 0.58
 colorMode: gradient
 waveFrequency: 4
 waveAmplitude: 150
+spiralRotations: 6
+spiralRadius: 0.4
+circleRadius: 0.3
 useCoarseBinning: false
 useDynamicThreshold: false
 useBlurring: true

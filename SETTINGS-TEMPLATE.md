@@ -153,6 +153,9 @@ opacity: 0.04
 colorMode: gradient
 waveFrequency: 4
 waveAmplitude: 150
+spiralRotations: 6
+spiralRadius: 0.4
+circleRadius: 0.3
 useCoarseBinning: false
 useDynamicThreshold: false
 useBlurring: false
@@ -167,6 +170,10 @@ threshold: 25
 thetaStep: 0.5
 opacity: 0.12
 colorMode: rainbow
+waveFrequency: 4
+waveAmplitude: 150
+spiralRotations: 6
+spiralRadius: 0.4
 circleRadius: 0.3
 useCoarseBinning: true
 thetaBinSize: 2
@@ -184,6 +191,11 @@ threshold: 8
 thetaStep: 2
 opacity: 0.20
 colorMode: ocean
+waveFrequency: 4
+waveAmplitude: 150
+spiralRotations: 6
+spiralRadius: 0.4
+circleRadius: 0.3
 useCoarseBinning: false
 useDynamicThreshold: false
 useBlurring: true
@@ -199,6 +211,11 @@ threshold: 35
 thetaStep: 1
 opacity: 0.90
 colorMode: mono
+waveFrequency: 4
+waveAmplitude: 150
+spiralRotations: 6
+spiralRadius: 0.4
+circleRadius: 0.3
 useCoarseBinning: false
 useDynamicThreshold: true
 thresholdMultiplier: 0.25
@@ -214,6 +231,11 @@ threshold: 5
 thetaStep: 1
 opacity: 0.02
 colorMode: gradient
+waveFrequency: 4
+waveAmplitude: 150
+spiralRotations: 6
+spiralRadius: 0.4
+circleRadius: 0.3
 useCoarseBinning: true
 thetaBinSize: 3
 rhoBinSize: 8

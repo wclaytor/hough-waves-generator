@@ -11,6 +11,11 @@ threshold: 7
 thetaStep: 0.5
 opacity: 0.01
 colorMode: mono
+waveFrequency: 4
+waveAmplitude: 150
+spiralRotations: 6
+spiralRadius: 0.4
+circleRadius: 0.3
 useCoarseBinning: true
 thetaBinSize: 2
 rhoBinSize: 5
