@@ -76,7 +76,7 @@ This template provides all available settings with example values. Use this as a
 ### Color Mode
 **Setting**: `colorMode`  
 **Type**: Selection  
-**Options**: `mono`, `rainbow`, `gradient`, `ocean`, `fire`, `sunset`, `forest`, `neon`, `pastel`, `midnight`, `autumn`, `spring`, `galaxy`, `lava`, `arctic`  
+**Options**: `arctic`, `autumn`, `awakening`, `bronze`, `california`, `campfire`, `concrete`, `copper`, `desert`, `fire`, `foolsgold`, `forest`, `galaxy`, `glass`, `gradient`, `hematite`, `irish`, `lava`, `matrix`, `midnight`, `mono`, `neon`, `obsidian`, `ocean`, `oldwest`, `pastel`, `platinum`, `rainbow`, `rasta`, `ruby`, `sand`, `sky`, `spring`, `stainless`, `sunset`, `twilight`, `usa`  
 **Example**: `mono`  
 **Description**: Determines line coloring strategy
 

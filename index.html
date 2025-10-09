@@ -287,21 +287,43 @@
                     </h3>
                     <select x-model="colorMode" @change="render()" 
                             class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="mono">Monochrome</option>
-                        <option value="rainbow">Rainbow</option>
-                        <option value="gradient">Gradient</option>
-                        <option value="ocean">Ocean</option>
-                        <option value="fire">Fire</option>
-                        <option value="sunset">Sunset</option>
-                        <option value="forest">Forest</option>
-                        <option value="neon">Neon</option>
-                        <option value="pastel">Pastel</option>
-                        <option value="midnight">Midnight</option>
-                        <option value="autumn">Autumn</option>
-                        <option value="spring">Spring</option>
-                        <option value="galaxy">Galaxy</option>
-                        <option value="lava">Lava</option>
                         <option value="arctic">Arctic</option>
+                        <option value="autumn">Autumn</option>
+                        <option value="awakening">Awakening</option>
+                        <option value="bronze">Bronze</option>
+                        <option value="california">California Dreaming</option>
+                        <option value="campfire">Campfire</option>
+                        <option value="concrete">Concrete</option>
+                        <option value="copper">Copper</option>
+                        <option value="desert">Desert Bloom</option>
+                        <option value="fire">Fire</option>
+                        <option value="foolsgold">Fools Gold</option>
+                        <option value="forest">Forest</option>
+                        <option value="galaxy">Galaxy</option>
+                        <option value="glass">Glass</option>
+                        <option value="gradient">Gradient</option>
+                        <option value="hematite">Hematite</option>
+                        <option value="irish">Irish</option>
+                        <option value="lava">Lava</option>
+                        <option value="matrix">Matrix</option>
+                        <option value="midnight">Midnight</option>
+                        <option value="mono">Monochrome</option>
+                        <option value="neon">Neon</option>
+                        <option value="obsidian">Obsidian</option>
+                        <option value="ocean">Ocean</option>
+                        <option value="oldwest">The Old West</option>
+                        <option value="pastel">Pastel</option>
+                        <option value="platinum">Platinum</option>
+                        <option value="rainbow">Rainbow</option>
+                        <option value="rasta">Rasta</option>
+                        <option value="ruby">Ruby</option>
+                        <option value="sand">Sand</option>
+                        <option value="sky">Sky</option>
+                        <option value="spring">Spring</option>
+                        <option value="stainless">Stainless</option>
+                        <option value="sunset">Sunset</option>
+                        <option value="twilight">Twilight</option>
+                        <option value="usa">USA</option>
                     </select>
                 </div>
 
@@ -829,7 +851,39 @@
                         spring: () => `hsl(${(index/total) * 90 + 60}, 70%, ${this.darkMode ? 60 : 50}%)`,
                         galaxy: () => `hsl(${(index/total) * 100 + 260}, 80%, ${this.darkMode ? 65 : 45}%)`,
                         lava: () => `hsl(${(index/total) * 40}, 90%, ${this.darkMode ? 50 : 40}%)`,
-                        arctic: () => `hsl(${180 + (index/total) * 40}, 50%, ${this.darkMode ? 70 : 75}%)`
+                        arctic: () => `hsl(${180 + (index/total) * 40}, 50%, ${this.darkMode ? 70 : 75}%)`,
+                        // New color modes
+                        awakening: () => `hsl(${270 + (index/total) * 60}, 75%, ${this.darkMode ? 60 : 50}%)`,
+                        bronze: () => `hsl(${25 + (index/total) * 15}, 60%, ${this.darkMode ? 50 : 40}%)`,
+                        california: () => `hsl(${310 + (index/total) * 50}, 80%, ${this.darkMode ? 65 : 55}%)`,
+                        campfire: () => `hsl(${15 + (index/total) * 30}, 85%, ${this.darkMode ? 55 : 50}%)`,
+                        concrete: () => `hsl(30, ${5 + (index/total) * 10}%, ${this.darkMode ? 65 : 55}%)`,
+                        copper: () => `hsl(${15 + (index/total) * 15}, 80%, ${this.darkMode ? 60 : 50}%)`,
+                        desert: () => `hsl(${10 + (index/total) * 50}, 80%, ${this.darkMode ? 65 : 55}%)`,
+                        foolsgold: () => `hsl(${45 + (index/total) * 15}, 90%, ${this.darkMode ? 65 : 55}%)`,
+                        glass: () => `hsl(${200 + (index/total) * 20}, 50%, ${this.darkMode ? 80 : 75}%)`,
+                        hematite: () => `hsl(${(index/total) * 20}, 30%, ${this.darkMode ? 35 : 25}%)`,
+                        irish: () => {
+                            const colors = ['hsl(120, 60%, 45%)', 'hsl(0, 0%, 100%)', 'hsl(30, 100%, 50%)'];
+                            return colors[index % 3];
+                        },
+                        matrix: () => `hsl(${120 + (index/total) * 20}, 100%, ${this.darkMode ? 50 : 40}%)`,
+                        obsidian: () => `hsl(${260 + (index/total) * 30}, 40%, ${this.darkMode ? 25 : 15}%)`,
+                        oldwest: () => `hsl(${25 + (index/total) * 25}, 45%, ${this.darkMode ? 45 : 35}%)`,
+                        platinum: () => `hsl(200, 10%, ${this.darkMode ? 85 : 75}%)`,
+                        rasta: () => {
+                            const colors = ['hsl(0, 100%, 50%)', 'hsl(60, 100%, 50%)', 'hsl(120, 100%, 35%)'];
+                            return colors[index % 3];
+                        },
+                        ruby: () => `hsl(${340 + (index/total) * 30}, 85%, ${this.darkMode ? 55 : 45}%)`,
+                        sand: () => `hsl(${40 + (index/total) * 20}, 50%, ${this.darkMode ? 70 : 60}%)`,
+                        sky: () => `hsl(${190 + (index/total) * 30}, 60%, ${this.darkMode ? 75 : 70}%)`,
+                        stainless: () => `hsl(210, 15%, ${this.darkMode ? 65 : 55}%)`,
+                        twilight: () => `hsl(${260 + (index/total) * 40}, 60%, ${this.darkMode ? 45 : 35}%)`,
+                        usa: () => {
+                            const colors = ['hsl(220, 100%, 50%)', 'hsl(0, 0%, 100%)', 'hsl(0, 100%, 50%)'];
+                            return colors[index % 3];
+                        }
                     };
                     
                     return modes[this.colorMode]();
@@ -987,7 +1041,7 @@
                     this.opacity = 0.02 + Math.random() * 0.3; // Range from 2% to 32%
                     this.thetaStep = 0.5 + Math.random() * 2.5;
                     this.pattern = ['wave', 'spiral', 'circle', 'grid', 'random'][Math.floor(Math.random() * 5)];
-                    this.colorMode = ['mono', 'rainbow', 'gradient', 'ocean', 'fire', 'sunset', 'forest', 'neon', 'pastel', 'midnight', 'autumn', 'spring', 'galaxy', 'lava', 'arctic'][Math.floor(Math.random() * 15)];
+                    this.colorMode = ['arctic', 'autumn', 'awakening', 'bronze', 'california', 'campfire', 'concrete', 'copper', 'desert', 'fire', 'foolsgold', 'forest', 'galaxy', 'glass', 'gradient', 'hematite', 'irish', 'lava', 'matrix', 'midnight', 'mono', 'neon', 'obsidian', 'ocean', 'oldwest', 'pastel', 'platinum', 'rainbow', 'rasta', 'ruby', 'sand', 'sky', 'spring', 'stainless', 'sunset', 'twilight', 'usa'][Math.floor(Math.random() * 37)];
                     
                     // Randomize pattern-specific parameters
                     this.waveFrequency = 0.1 + Math.random() * 9.9; // 0.1-10
