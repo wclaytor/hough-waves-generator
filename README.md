@@ -100,10 +100,17 @@ This implementation was developed through collaborative AI-assisted development:
 Determines the spatial distribution of initial points:
 
 - **Wave** - Sinusoidal curve with added noise. Creates flowing, organic patterns
+  - *Frequency* (1-10): Number of wave cycles across canvas
+  - *Amplitude* (50-250px): Height of wave peaks
 - **Spiral** - Expanding vortex from center. Produces radial symmetry
+  - *Rotations* (1-10): Number of complete rotations
+  - *Radius* (20-50%): Size relative to canvas
 - **Circle** - Points arranged in a circle. Creates mandala-like designs
+  - *Radius* (10-50%): Size relative to canvas
 - **Grid** - Regular grid layout. Generates geometric networks
 - **Random** - Scattered points. Produces chaotic, constellation-like patterns
+
+**Note**: Pattern-specific parameters appear dynamically when you select Wave, Spiral, or Circle patterns, allowing fine-tuned control over the pattern shape.
 
 #### **Points** (10-150)
 Controls how many points are generated:

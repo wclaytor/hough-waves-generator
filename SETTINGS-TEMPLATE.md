@@ -11,6 +11,42 @@ This template provides all available settings with example values. Use this as a
 **Example**: `wave`  
 **Description**: Determines the spatial distribution of initial points
 
+#### Wave Pattern Parameters
+**Setting**: `waveFrequency`  
+**Type**: Range (1-10)  
+**Example**: `4`  
+**Description**: Number of wave cycles across the canvas  
+**Note**: Only applies when pattern is `wave`
+
+**Setting**: `waveAmplitude`  
+**Type**: Range (50-250)  
+**Unit**: Pixels (px)  
+**Example**: `150`  
+**Description**: Height of the wave peaks  
+**Note**: Only applies when pattern is `wave`
+
+#### Spiral Pattern Parameters
+**Setting**: `spiralRotations`  
+**Type**: Range (1-10)  
+**Example**: `6`  
+**Description**: Number of complete rotations in the spiral  
+**Note**: Only applies when pattern is `spiral`
+
+**Setting**: `spiralRadius`  
+**Type**: Range (0.2-0.5)  
+**Example**: `0.4`  
+**Percentage**: `40%`  
+**Description**: Size of the spiral relative to canvas  
+**Note**: Only applies when pattern is `spiral`
+
+#### Circle Pattern Parameters
+**Setting**: `circleRadius`  
+**Type**: Range (0.1-0.5)  
+**Example**: `0.3`  
+**Percentage**: `30%`  
+**Description**: Size of the circle relative to canvas  
+**Note**: Only applies when pattern is `circle`
+
 ### Number of Points
 **Setting**: `numPoints`  
 **Type**: Range (10-150)  
@@ -115,6 +151,8 @@ threshold: 12
 thetaStep: 1
 opacity: 0.04
 colorMode: gradient
+waveFrequency: 4
+waveAmplitude: 150
 useCoarseBinning: false
 useDynamicThreshold: false
 useBlurring: false
@@ -129,6 +167,7 @@ threshold: 25
 thetaStep: 0.5
 opacity: 0.12
 colorMode: rainbow
+circleRadius: 0.3
 useCoarseBinning: true
 thetaBinSize: 2
 rhoBinSize: 5
@@ -220,6 +259,11 @@ threshold: 15
 thetaStep: 1
 opacity: 0.05
 colorMode: mono
+waveFrequency: 4
+waveAmplitude: 150
+spiralRotations: 6
+spiralRadius: 0.4
+circleRadius: 0.3
 useCoarseBinning: false
 thetaBinSize: 1
 rhoBinSize: 2
