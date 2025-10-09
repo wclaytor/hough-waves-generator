@@ -37,9 +37,9 @@
             transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
         
-        /* Lock mode: Calculate sticky canvas position below header */
+        /* Lock mode: Calculate sticky canvas position below header (no gap) */
         .locked-canvas {
-            top: calc(var(--header-height, 100px) + 1rem);
+            top: var(--header-height, 100px);
         }
     </style>
 </head>
@@ -47,7 +47,7 @@
     <div x-data="houghWaves()" x-cloak :class="darkMode ? 'dark' : ''" class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
         <div class="container mx-auto p-4 md:p-6 max-w-7xl">
             <!-- Header -->
-            <header x-ref="header" :class="isLocked ? 'sticky top-0 z-40' : ''" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 md:p-6 mb-4 md:mb-6 transition-colors duration-300">
+            <header x-ref="header" :class="isLocked ? 'sticky top-0 z-40 mb-0 rounded-t-lg rounded-b-none' : 'mb-4 md:mb-6 rounded-lg'" class="bg-white dark:bg-gray-800 shadow-md p-4 md:p-6 transition-colors duration-300">
                 <div class="flex items-center justify-between flex-wrap gap-4">
                     <div>
                         <h1 class="text-2xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
@@ -76,7 +76,7 @@
             </header>
 
             <!-- Canvas Section -->
-            <div :class="isLocked ? 'sticky locked-canvas z-30' : ''" x-ref="canvasSection" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 md:p-6 mb-4 md:mb-6 transition-colors duration-300" x-init="$watch('isLocked', () => { if (isLocked && $refs.header) { $el.style.setProperty('--header-height', $refs.header.offsetHeight + 'px'); } })">
+            <div :class="isLocked ? 'sticky locked-canvas z-30 rounded-b-lg rounded-t-none' : 'rounded-lg'" x-ref="canvasSection" class="bg-white dark:bg-gray-800 shadow-md p-4 md:p-6 mb-4 md:mb-6 transition-colors duration-300" x-init="$watch('isLocked', () => { if (isLocked && $refs.header) { $el.style.setProperty('--header-height', $refs.header.offsetHeight + 'px'); } })">
                 <canvas x-ref="canvas" 
                         width="800" 
                         height="600" 
