@@ -138,10 +138,24 @@
 
                 <!-- Theta Resolution Control -->
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
-                        <i class="bi bi-diagram-3 text-indigo-500"></i>
-                        Resolution: <span x-text="thetaStep + '°'"></span>
-                    </h3>
+                    <div class="mb-4 flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                            <i class="bi bi-diagram-3 text-indigo-500"></i>
+                            Resolution: <span x-text="thetaStep + '°'"></span>
+                        </h3>
+                        <div class="flex items-center gap-1">
+                            <button @click="decrementResolution()"
+                                    class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                                    title="Decrease by 0.1">
+                                <i class="bi bi-dash text-lg"></i>
+                            </button>
+                            <button @click="incrementResolution()"
+                                    class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                                    title="Increase by 0.1">
+                                <i class="bi bi-plus text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
                     <input type="range" x-model.number="thetaStep" min="0.5" max="5" step="0.5"
                            @input="generate()" 
                            class="w-full">
@@ -391,6 +405,21 @@
                 decrementThreshold() {
                     if (this.threshold > 5) {
                         this.threshold--;
+                        this.generate();
+                    }
+                },
+
+                // === RESOLUTION CONTROL ===
+                incrementResolution() {
+                    if (this.thetaStep < 5) {
+                        this.thetaStep = Math.round((this.thetaStep + 0.1) * 10) / 10;
+                        this.generate();
+                    }
+                },
+
+                decrementResolution() {
+                    if (this.thetaStep > 0.5) {
+                        this.thetaStep = Math.round((this.thetaStep - 0.1) * 10) / 10;
                         this.generate();
                     }
                 },
