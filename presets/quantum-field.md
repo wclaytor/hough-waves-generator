@@ -1,0 +1,22 @@
+# Quantum Field
+
+Complex pattern with all optimizations enabled for maximum line detection and dense results.
+
+## Settings
+
+```
+pattern: random
+numPoints: 150
+threshold: 5
+thetaStep: 1
+opacity: 0.02
+colorMode: gradient
+useCoarseBinning: true
+thetaBinSize: 3
+rhoBinSize: 8
+useDynamicThreshold: true
+thresholdMultiplier: 0.15
+useBlurring: true
+blurRadius: 2
+darkMode: false
+```
