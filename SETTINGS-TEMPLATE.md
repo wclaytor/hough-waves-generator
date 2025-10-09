@@ -61,7 +61,7 @@ This template provides all available settings with example values. Use this as a
 
 ### Resolution (Theta Step)
 **Setting**: `thetaStep`  
-**Type**: Range (0.5-5.0)  
+**Type**: Range (0.1-5.0)  
 **Unit**: Degrees (°)  
 **Example**: `1`  
 **Description**: Angular step size when sampling θ values

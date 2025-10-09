@@ -249,7 +249,7 @@
                             </button>
                         </div>
                     </div>
-                    <input type="range" x-model.number="thetaStep" min="0.5" max="5" step="0.5"
+                    <input type="range" x-model.number="thetaStep" min="0.1" max="5" step="0.1"
                            @input="generate()" 
                            class="w-full">
                 </div>
@@ -595,7 +595,7 @@
                 },
 
                 decrementResolution() {
-                    if (this.thetaStep > 0.5) {
+                    if (this.thetaStep > 0.1) {
                         this.thetaStep = Math.round((this.thetaStep - 0.1) * 10) / 10;
                         this.generate();
                     }

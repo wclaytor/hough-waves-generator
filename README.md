@@ -129,9 +129,9 @@ Minimum votes required for a line to be drawn:
 
 **Key Insight**: This is the "confidence level" for line detection. Lower threshold = more artistic freedom, higher = more mathematical precision
 
-#### **Resolution** (0.5°-5°)
+#### **Resolution** (0.1°-5°)
 Angular step size when sampling θ values:
-- **Fine (0.5°-1°)**: Smooth, precise curves. More computational work
+- **Fine (0.1°-1°)**: Smooth, precise curves. More computational work
 - **Medium (1°-2°)**: Good balance of quality and performance
 - **Coarse (3°-5°)**: Faster computation, more artistic variation
 
