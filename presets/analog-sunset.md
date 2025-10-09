@@ -1,8 +1,8 @@
 # Analog Sunset
 Experiment with the new Sunset color mode. The Course Binning with 6px Rho Bin and Vote Blurring with 2.6 radius creates the layered effect.
 
-**Exported**: 2025-10-09
-**Author**: wclaytor
+- **Created**: 2025-10-09
+- **Author**: wclaytor
 
 ## Settings
 
