@@ -6,16 +6,16 @@ Geometric circular pattern with coarse binning optimization for clean, symmetric
 
 ```
 pattern: circle
+circleRadius: 0.3
 numPoints: 120
 threshold: 7
 thetaStep: 0.5
-opacity: 65
+opacity: 0.5
 colorMode: rainbow
-circleRadius: 0.3
 useCoarseBinning: true
 thetaBinSize: 2
 rhoBinSize: 5
 useDynamicThreshold: false
 useBlurring: false
-darkMode: user
+darkMode: true
 ```

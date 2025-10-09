@@ -9,7 +9,7 @@ pattern: grid
 numPoints: 40
 threshold: 7
 thetaStep: 0.5
-opacity: 0.01
+opacity: 0.90
 colorMode: mono
 useCoarseBinning: true
 thetaBinSize: 2

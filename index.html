@@ -837,13 +837,8 @@
                     markdown += `## Settings\n\n`;
                     markdown += `\`\`\`\n`;
                     markdown += `pattern: ${this.pattern}\n`;
-                    markdown += `numPoints: ${this.numPoints}\n`;
-                    markdown += `threshold: ${this.threshold}\n`;
-                    markdown += `thetaStep: ${this.thetaStep}\n`;
-                    markdown += `opacity: ${this.opacity}\n`;
-                    markdown += `colorMode: ${this.colorMode}\n`;
                     
-                    // Include pattern-specific parameters
+                    // Include pattern-specific parameters immediately after pattern
                     if (this.pattern === 'wave') {
                         markdown += `waveFrequency: ${this.waveFrequency}\n`;
                         markdown += `waveAmplitude: ${this.waveAmplitude}\n`;
@@ -854,6 +849,11 @@
                         markdown += `circleRadius: ${this.circleRadius}\n`;
                     }
                     
+                    markdown += `numPoints: ${this.numPoints}\n`;
+                    markdown += `threshold: ${this.threshold}\n`;
+                    markdown += `thetaStep: ${this.thetaStep}\n`;
+                    markdown += `opacity: ${this.opacity}\n`;
+                    markdown += `colorMode: ${this.colorMode}\n`;
                     markdown += `useCoarseBinning: ${this.useCoarseBinning}\n`;
                     
                     // Only include coarse binning settings if enabled
@@ -907,13 +907,8 @@
                     markdown += `## Settings\n\n`;
                     markdown += `\`\`\`\n`;
                     markdown += `pattern: ${this.pattern}\n`;
-                    markdown += `numPoints: ${this.numPoints}\n`;
-                    markdown += `threshold: ${this.threshold}\n`;
-                    markdown += `thetaStep: ${this.thetaStep}\n`;
-                    markdown += `opacity: ${this.opacity}\n`;
-                    markdown += `colorMode: ${this.colorMode}\n`;
                     
-                    // Include pattern-specific parameters
+                    // Include pattern-specific parameters immediately after pattern
                     if (this.pattern === 'wave') {
                         markdown += `waveFrequency: ${this.waveFrequency}\n`;
                         markdown += `waveAmplitude: ${this.waveAmplitude}\n`;
@@ -924,6 +919,11 @@
                         markdown += `circleRadius: ${this.circleRadius}\n`;
                     }
                     
+                    markdown += `numPoints: ${this.numPoints}\n`;
+                    markdown += `threshold: ${this.threshold}\n`;
+                    markdown += `thetaStep: ${this.thetaStep}\n`;
+                    markdown += `opacity: ${this.opacity}\n`;
+                    markdown += `colorMode: ${this.colorMode}\n`;
                     markdown += `useCoarseBinning: ${this.useCoarseBinning}\n`;
                     
                     // Only include coarse binning settings if enabled

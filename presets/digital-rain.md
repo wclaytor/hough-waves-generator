@@ -9,7 +9,7 @@ pattern: random
 numPoints: 60
 threshold: 10
 thetaStep: 0.5
-opacity: 0.45
+opacity: 0.50
 colorMode: ocean
 useCoarseBinning: false
 useDynamicThreshold: false

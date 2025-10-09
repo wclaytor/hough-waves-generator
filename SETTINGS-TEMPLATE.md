@@ -146,13 +146,13 @@ This template provides all available settings with example values. Use this as a
 ### Example 1: Aurora Borealis
 ```
 pattern: wave
+waveFrequency: 4
+waveAmplitude: 150
 numPoints: 85
 threshold: 12
 thetaStep: 1
 opacity: 0.04
 colorMode: gradient
-waveFrequency: 4
-waveAmplitude: 150
 useCoarseBinning: false
 useDynamicThreshold: false
 useBlurring: false
@@ -162,12 +162,12 @@ darkMode: false
 ### Example 2: Crystal Mandala (with Coarse Binning)
 ```
 pattern: circle
+circleRadius: 0.3
 numPoints: 120
 threshold: 25
 thetaStep: 0.5
 opacity: 0.12
 colorMode: rainbow
-circleRadius: 0.3
 useCoarseBinning: true
 thetaBinSize: 2
 rhoBinSize: 5

@@ -6,13 +6,13 @@ Flowing, layered waves resembling northern lights.
 
 ```
 pattern: wave
+waveFrequency: 4
+waveAmplitude: 150
 numPoints: 45
 threshold: 7
 thetaStep: 0.5
-opacity: 0.58
+opacity: 0.4
 colorMode: gradient
-waveFrequency: 4
-waveAmplitude: 150
 useCoarseBinning: false
 useDynamicThreshold: false
 useBlurring: true
