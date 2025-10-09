@@ -26,6 +26,9 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
+    <!-- Marked.js for markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.0.0/marked.min.js"></script>
+    
     <style>
         [x-cloak] { display: none !important; }
         
@@ -70,6 +73,22 @@
 
             <!-- Controls Section -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 md:mb-6">
+                <!-- Presets -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-stars text-amber-500"></i>
+                        Presets
+                    </h3>
+                    <select x-model="selectedPreset" @change="applyPreset()" 
+                            class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2">
+                        <option value="">-- Select a Preset --</option>
+                        <template x-for="preset in presets" :key="preset.id">
+                            <option :value="preset.id" x-text="preset.name" style="text-transform: capitalize;"></option>
+                        </template>
+                    </select>
+                    <div x-show="presetDescription" class="text-sm text-gray-600 dark:text-gray-400 mt-2 italic" x-text="presetDescription"></div>
+                </div>
+
                 <!-- Pattern Controls -->
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
                     <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
@@ -362,6 +381,12 @@
                 useBlurring: false,
                 blurRadius: 1,    // Number of neighboring bins to blur into
 
+                // === PRESETS ===
+                presets: [],
+                selectedPreset: '',
+                presetDescription: '',
+                loadingPresets: false,
+
                 // === INITIALIZATION ===
                 init() {
                     this.canvas = this.$refs.canvas;
@@ -371,6 +396,9 @@
                     const savedDarkMode = localStorage.getItem('hough-waves-darkMode');
                     this.darkMode = savedDarkMode === 'true';
                     this.updateDarkMode();
+                    
+                    // Load presets from manifest
+                    this.loadPresetsFromManifest();
                     
                     // Generate initial pattern
                     this.generate();
@@ -669,6 +697,122 @@
                     this.pattern = ['wave', 'spiral', 'circle', 'grid', 'random'][Math.floor(Math.random() * 5)];
                     this.colorMode = ['mono', 'rainbow', 'gradient', 'ocean', 'fire'][Math.floor(Math.random() * 5)];
                     this.generate();
+                },
+
+                // === PRESETS ===
+                async loadPresetsFromManifest() {
+                    this.loadingPresets = true;
+                    
+                    try {
+                        // Load preset list from manifest
+                        const manifestResponse = await fetch('presets.json');
+                        if (manifestResponse.ok) {
+                            const presetList = await manifestResponse.json();
+                            
+                            // Map filenames to preset objects
+                            this.presets = presetList
+                                .filter(filename => filename.endsWith('.md'))
+                                .map(filename => ({
+                                    name: filename.replace('.md', '').replace(/-/g, ' '),
+                                    filename: filename,
+                                    path: `presets/${filename}`,
+                                    id: filename.replace('.md', '')
+                                }));
+                        }
+                    } catch (error) {
+                        console.error('Error loading presets:', error);
+                    } finally {
+                        this.loadingPresets = false;
+                    }
+                },
+
+                async applyPreset() {
+                    if (!this.selectedPreset) {
+                        this.presetDescription = '';
+                        return;
+                    }
+
+                    this.loadingPresets = true;
+                    
+                    try {
+                        // Find the selected preset
+                        const preset = this.presets.find(p => p.id === this.selectedPreset);
+                        if (!preset) return;
+
+                        // Fetch markdown file from presets/ directory
+                        const response = await fetch(preset.path);
+                        if (!response.ok) {
+                            throw new Error('Failed to load preset file');
+                        }
+                        
+                        const markdown = await response.text();
+                        
+                        // Extract description (everything before "## Settings")
+                        const parts = markdown.split('## Settings');
+                        if (parts.length > 0) {
+                            // Get the title and description, remove the title heading
+                            let description = parts[0].trim();
+                            description = description.replace(/^#\s+[^\n]+\n+/, ''); // Remove title
+                            this.presetDescription = description.trim();
+                        }
+                        
+                        // Extract settings block (code block after "## Settings")
+                        if (parts.length > 1) {
+                            const settingsSection = parts[1];
+                            const codeBlockMatch = settingsSection.match(/```\s*\n([\s\S]*?)\n```/);
+                            
+                            if (codeBlockMatch) {
+                                const settingsText = codeBlockMatch[1];
+                                
+                                // Parse settings line by line
+                                const lines = settingsText.split('\n');
+                                const settings = {};
+                                
+                                lines.forEach(line => {
+                                    const match = line.match(/^(\w+):\s*(.+)$/);
+                                    if (match) {
+                                        const key = match[1];
+                                        let value = match[2].trim();
+                                        
+                                        // Convert string values to appropriate types
+                                        if (value === 'true') value = true;
+                                        else if (value === 'false') value = false;
+                                        else if (!isNaN(value)) value = parseFloat(value);
+                                        
+                                        settings[key] = value;
+                                    }
+                                });
+                                
+                                // Apply settings to component state
+                                if (settings.pattern) this.pattern = settings.pattern;
+                                if (settings.numPoints) this.numPoints = settings.numPoints;
+                                if (settings.threshold) this.threshold = settings.threshold;
+                                if (settings.thetaStep !== undefined) this.thetaStep = settings.thetaStep;
+                                if (settings.opacity !== undefined) this.opacity = settings.opacity;
+                                if (settings.colorMode) this.colorMode = settings.colorMode;
+                                if (settings.useCoarseBinning !== undefined) this.useCoarseBinning = settings.useCoarseBinning;
+                                if (settings.thetaBinSize !== undefined) this.thetaBinSize = settings.thetaBinSize;
+                                if (settings.rhoBinSize !== undefined) this.rhoBinSize = settings.rhoBinSize;
+                                if (settings.useDynamicThreshold !== undefined) this.useDynamicThreshold = settings.useDynamicThreshold;
+                                if (settings.thresholdMultiplier !== undefined) this.thresholdMultiplier = settings.thresholdMultiplier;
+                                if (settings.useBlurring !== undefined) this.useBlurring = settings.useBlurring;
+                                if (settings.blurRadius !== undefined) this.blurRadius = settings.blurRadius;
+                                if (settings.darkMode !== undefined) {
+                                    this.darkMode = settings.darkMode;
+                                    this.updateDarkMode();
+                                }
+                                
+                                // Regenerate with new settings
+                                this.generate();
+                            }
+                        }
+                        
+                    } catch (error) {
+                        console.error('Error applying preset:', error);
+                        alert('Failed to load preset: ' + error.message);
+                    } finally {
+                        this.loadingPresets = false;
+                    }
                 }
             }
         }
