@@ -9,13 +9,8 @@ pattern: random
 numPoints: 150
 threshold: 5
 thetaStep: 1
-opacity: 0.4
+opacity: 50
 colorMode: gradient
-waveFrequency: 4
-waveAmplitude: 150
-spiralRotations: 6
-spiralRadius: 0.4
-circleRadius: 0.3
 useCoarseBinning: true
 thetaBinSize: 3
 rhoBinSize: 8

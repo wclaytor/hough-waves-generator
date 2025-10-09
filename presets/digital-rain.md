@@ -9,13 +9,8 @@ pattern: random
 numPoints: 60
 threshold: 10
 thetaStep: 0.5
-opacity: 0.45
+opacity: 45
 colorMode: ocean
-waveFrequency: 4
-waveAmplitude: 150
-spiralRotations: 6
-spiralRadius: 0.4
-circleRadius: 0.3
 useCoarseBinning: false
 useDynamicThreshold: false
 useBlurring: true
