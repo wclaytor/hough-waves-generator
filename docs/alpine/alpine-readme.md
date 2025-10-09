@@ -85,6 +85,7 @@ Copy this starter template and save as an `.html` file:
 ## 📚 Documentation
 
 - **[Complete Alpine.js Guide](docs/alpine-guide.md)** - Comprehensive guide with patterns and examples
+- **[GitHub File Loading Guide](docs/github-file-loading.md)** - How to dynamically load content from your repository
 - **[Copilot Instructions](.github/copilot-instructions.md)** - How GitHub Copilot can help you build Alpine.js apps
 
 ## 🎯 Common Use Cases
@@ -256,6 +257,41 @@ exportData() {
 3. Start using immediately!
 
 ## 🔧 Advanced Features
+
+### Manifest-Based File Loading (NEW! 🎉)
+Dynamically load and display markdown files using a simple JSON manifest:
+
+```javascript
+async loadFilesFromGitHub() {
+    // Load file list from manifest
+    const manifestResponse = await fetch('files.json');
+    const fileList = await manifestResponse.json();
+    
+    // Map to file objects
+    this.files = fileList.map(filename => ({
+        name: filename,
+        path: `files/${filename}`,
+        id: filename.replace('.md', '')
+    }));
+}
+```
+
+**Benefits:**
+- ✅ Manage content as markdown files in your repo
+- ✅ No HTML editing needed for content updates
+- ✅ Simple manifest-based file management
+- ✅ Built-in markdown rendering with syntax highlighting
+- ✅ Search and filter functionality
+- ✅ Inspired by successful recipe site pattern
+
+**Use Cases:**
+- 📚 Documentation sites
+- 📖 Blog or article collections  
+- 🍳 Recipe repositories (like vegan-campsite-cookbook)
+- 📝 Knowledge bases
+- 🎓 Educational content
+
+See the [GitHub File Loading Guide](docs/github-file-loading.md) for complete documentation.
 
 ### File Upload Handling
 ```html
