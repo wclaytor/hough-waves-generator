@@ -36,13 +36,18 @@
         * {
             transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
+        
+        /* Lock mode: Calculate sticky canvas position below header */
+        .locked-canvas {
+            top: calc(var(--header-height, 100px) + 1rem);
+        }
     </style>
 </head>
 <body>
     <div x-data="houghWaves()" x-cloak :class="darkMode ? 'dark' : ''" class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
         <div class="container mx-auto p-4 md:p-6 max-w-7xl">
             <!-- Header -->
-            <header class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 md:p-6 mb-4 md:mb-6 transition-colors duration-300">
+            <header x-ref="header" :class="isLocked ? 'sticky top-0 z-40' : ''" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 md:p-6 mb-4 md:mb-6 transition-colors duration-300">
                 <div class="flex items-center justify-between flex-wrap gap-4">
                     <div>
                         <h1 class="text-2xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
@@ -51,18 +56,27 @@
                         </h1>
                         <p class="text-sm md:text-base text-gray-600 dark:text-gray-300">Algorithmic Art Generator - Transform mathematics into visual art</p>
                     </div>
-                    <button 
-                        @click="toggleDarkMode()"
-                        class="p-3 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
-                        title="Toggle dark mode">
-                        <i x-show="!darkMode" class="bi bi-moon text-xl"></i>
-                        <i x-show="darkMode" class="bi bi-sun text-xl"></i>
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button 
+                            @click="toggleLock()"
+                            class="p-3 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                            :title="isLocked ? 'Unlock titlebar and canvas' : 'Lock titlebar and canvas'">
+                            <i x-show="!isLocked" class="bi bi-unlock text-xl"></i>
+                            <i x-show="isLocked" class="bi bi-lock-fill text-xl"></i>
+                        </button>
+                        <button 
+                            @click="toggleDarkMode()"
+                            class="p-3 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                            title="Toggle dark mode">
+                            <i x-show="!darkMode" class="bi bi-moon text-xl"></i>
+                            <i x-show="darkMode" class="bi bi-sun text-xl"></i>
+                        </button>
+                    </div>
                 </div>
             </header>
 
             <!-- Canvas Section -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 md:p-6 mb-4 md:mb-6 transition-colors duration-300">
+            <div :class="isLocked ? 'sticky locked-canvas z-30' : ''" x-ref="canvasSection" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 md:p-6 mb-4 md:mb-6 transition-colors duration-300" x-init="$watch('isLocked', () => { if (isLocked && $refs.header) { $el.style.setProperty('--header-height', $refs.header.offsetHeight + 'px'); } })">
                 <canvas x-ref="canvas" 
                         width="800" 
                         height="600" 
@@ -456,6 +470,7 @@
                 colorMode: 'mono',
                 lines: [],
                 darkMode: false,
+                isLocked: false,
                 canvas: null,
                 ctx: null,
                 thetaStep: 1, // Resolution of theta sampling (degrees)
@@ -497,6 +512,10 @@
                     this.darkMode = savedDarkMode === 'true';
                     this.updateDarkMode();
                     
+                    // Load lock preference
+                    const savedLocked = localStorage.getItem('hough-waves-locked');
+                    this.isLocked = savedLocked === 'true';
+                    
                     // Load presets from manifest
                     this.loadPresetsFromManifest();
                     
@@ -519,6 +538,12 @@
                     } else {
                         document.documentElement.classList.remove('dark');
                     }
+                },
+
+                // === LOCK MODE ===
+                toggleLock() {
+                    this.isLocked = !this.isLocked;
+                    localStorage.setItem('hough-waves-locked', this.isLocked.toString());
                 },
 
                 // === POINTS CONTROL ===
