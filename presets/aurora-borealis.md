@@ -11,6 +11,8 @@ threshold: 12
 thetaStep: 1
 opacity: 0.04
 colorMode: gradient
+waveFrequency: 4
+waveAmplitude: 150
 useCoarseBinning: false
 useDynamicThreshold: false
 useBlurring: false

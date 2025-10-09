@@ -817,6 +817,18 @@
                     markdown += `thetaStep: ${this.thetaStep}\n`;
                     markdown += `opacity: ${this.opacity}\n`;
                     markdown += `colorMode: ${this.colorMode}\n`;
+                    
+                    // Include pattern-specific parameters
+                    if (this.pattern === 'wave') {
+                        markdown += `waveFrequency: ${this.waveFrequency}\n`;
+                        markdown += `waveAmplitude: ${this.waveAmplitude}\n`;
+                    } else if (this.pattern === 'spiral') {
+                        markdown += `spiralRotations: ${this.spiralRotations}\n`;
+                        markdown += `spiralRadius: ${this.spiralRadius}\n`;
+                    } else if (this.pattern === 'circle') {
+                        markdown += `circleRadius: ${this.circleRadius}\n`;
+                    }
+                    
                     markdown += `useCoarseBinning: ${this.useCoarseBinning}\n`;
                     
                     // Only include coarse binning settings if enabled
@@ -875,6 +887,18 @@
                     markdown += `thetaStep: ${this.thetaStep}\n`;
                     markdown += `opacity: ${this.opacity}\n`;
                     markdown += `colorMode: ${this.colorMode}\n`;
+                    
+                    // Include pattern-specific parameters
+                    if (this.pattern === 'wave') {
+                        markdown += `waveFrequency: ${this.waveFrequency}\n`;
+                        markdown += `waveAmplitude: ${this.waveAmplitude}\n`;
+                    } else if (this.pattern === 'spiral') {
+                        markdown += `spiralRotations: ${this.spiralRotations}\n`;
+                        markdown += `spiralRadius: ${this.spiralRadius}\n`;
+                    } else if (this.pattern === 'circle') {
+                        markdown += `circleRadius: ${this.circleRadius}\n`;
+                    }
+                    
                     markdown += `useCoarseBinning: ${this.useCoarseBinning}\n`;
                     
                     // Only include coarse binning settings if enabled
@@ -919,6 +943,14 @@
                     this.thetaStep = 0.5 + Math.random() * 2.5;
                     this.pattern = ['wave', 'spiral', 'circle', 'grid', 'random'][Math.floor(Math.random() * 5)];
                     this.colorMode = ['mono', 'rainbow', 'gradient', 'ocean', 'fire'][Math.floor(Math.random() * 5)];
+                    
+                    // Randomize pattern-specific parameters
+                    this.waveFrequency = 1 + Math.random() * 9; // 1-10
+                    this.waveAmplitude = 50 + Math.floor(Math.random() * 200); // 50-250
+                    this.spiralRotations = 1 + Math.random() * 9; // 1-10
+                    this.spiralRadius = 0.2 + Math.random() * 0.3; // 0.2-0.5
+                    this.circleRadius = 0.1 + Math.random() * 0.4; // 0.1-0.5
+                    
                     this.generate();
                 },
 
@@ -1020,6 +1052,14 @@
                                 if (settings.thresholdMultiplier !== undefined) this.thresholdMultiplier = settings.thresholdMultiplier;
                                 if (settings.useBlurring !== undefined) this.useBlurring = settings.useBlurring;
                                 if (settings.blurRadius !== undefined) this.blurRadius = settings.blurRadius;
+                                
+                                // Pattern-specific parameters
+                                if (settings.waveFrequency !== undefined) this.waveFrequency = settings.waveFrequency;
+                                if (settings.waveAmplitude !== undefined) this.waveAmplitude = settings.waveAmplitude;
+                                if (settings.spiralRotations !== undefined) this.spiralRotations = settings.spiralRotations;
+                                if (settings.spiralRadius !== undefined) this.spiralRadius = settings.spiralRadius;
+                                if (settings.circleRadius !== undefined) this.circleRadius = settings.circleRadius;
+                                
                                 if (settings.darkMode !== undefined) {
                                     this.darkMode = settings.darkMode;
                                     this.updateDarkMode();

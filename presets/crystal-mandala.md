@@ -11,6 +11,7 @@ threshold: 7
 thetaStep: 0.5
 opacity: 65
 colorMode: rainbow
+circleRadius: 0.3
 useCoarseBinning: true
 thetaBinSize: 2
 rhoBinSize: 5
