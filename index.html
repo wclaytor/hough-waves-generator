@@ -61,6 +61,12 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <button 
+                            @click="copyShareLink()"
+                            class="p-3 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                            title="Copy share link to clipboard">
+                            <i class="bi bi-share text-xl"></i>
+                        </button>
+                        <button 
                             @click="toggleLock()"
                             class="p-3 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
                             :title="isLocked ? 'Unlock titlebar and canvas' : 'Lock titlebar and canvas'">
@@ -1288,6 +1294,28 @@
                         document.execCommand('copy');
                         document.body.removeChild(textarea);
                         alert('Settings copied to clipboard!');
+                    }
+                },
+
+                async copyShareLink() {
+                    // Generate share link with current URL
+                    const shareUrl = window.location.href;
+                    
+                    // Copy to clipboard
+                    try {
+                        await navigator.clipboard.writeText(shareUrl);
+                        alert('Share link copied to clipboard!');
+                    } catch (err) {
+                        // Fallback for older browsers
+                        const textarea = document.createElement('textarea');
+                        textarea.value = shareUrl;
+                        textarea.style.position = 'fixed';
+                        textarea.style.opacity = '0';
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        alert('Share link copied to clipboard!');
                     }
                 },
 
