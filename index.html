@@ -29,6 +29,9 @@
     <!-- Marked.js for markdown parsing -->
     <script src="https://cdn.jsdelivr.net/npm/marked@11.0.0/marked.min.js"></script>
     
+    <!-- JSZip for creating zip files -->
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    
     <style>
         [x-cloak] { display: none !important; }
         
@@ -449,7 +452,7 @@
                     <i class="bi bi-shuffle"></i>
                     Randomize All
                 </button>
-                <button @click="download()" 
+                <button @click="showDownloadModal = true" 
                         class="w-full bg-green-600 hover:bg-green-700 text-white p-3 md:p-4 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors">
                     <i class="bi bi-download"></i>
                     Download PNG
@@ -486,6 +489,165 @@
                     <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs font-medium">Algorithm: Hough Transform</span>
                     <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium">Alpine.js 3.x</span>
                     <span class="px-3 py-1 bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 rounded-full text-xs font-medium">Generative Art</span>
+                </div>
+            </div>
+
+            <!-- Download Options Modal -->
+            <div x-show="showDownloadModal" 
+                 @click="showDownloadModal = false"
+                 class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-8 z-50">
+                <div @click.stop 
+                     class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl transition-colors duration-300" 
+                     style="max-height: 90vh">
+                    
+                    <!-- Fixed Header -->
+                    <div class="bg-white dark:bg-gray-800 p-6 border-b border-gray-200 dark:border-gray-700 rounded-t-lg transition-colors duration-300">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">
+                                <i class="bi bi-download text-green-500"></i>
+                                Download Options
+                            </h3>
+                            <button @click="showDownloadModal = false" 
+                                    class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-300">
+                                <i class="bi bi-x text-2xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Scrollable Content -->
+                    <div class="bg-gray-50 dark:bg-gray-900 p-6 overflow-y-scroll transition-colors duration-300" 
+                         style="max-height: calc(90vh - 180px)">
+                        
+                        <!-- Custom Filename -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                <i class="bi bi-pencil"></i> Custom Filename
+                            </label>
+                            <input type="text" 
+                                   x-model="downloadFilename"
+                                   placeholder="hough-waves"
+                                   class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Leave empty to use default timestamp-based name</p>
+                        </div>
+
+                        <!-- Download Sizes -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                                <i class="bi bi-aspect-ratio"></i> Download Sizes
+                            </label>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <label class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition-colors">
+                                    <input type="checkbox" 
+                                           x-model="downloadSizes.thumbnail"
+                                           class="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                        Thumbnail<br>
+                                        <span class="text-xs text-gray-500">150x113</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition-colors">
+                                    <input type="checkbox" 
+                                           x-model="downloadSizes.sm"
+                                           class="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                        SM<br>
+                                        <span class="text-xs text-gray-500">640x480</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition-colors">
+                                    <input type="checkbox" 
+                                           x-model="downloadSizes.md"
+                                           class="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                        MD<br>
+                                        <span class="text-xs text-gray-500">800x600</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition-colors">
+                                    <input type="checkbox" 
+                                           x-model="downloadSizes.lg"
+                                           class="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                        LG<br>
+                                        <span class="text-xs text-gray-500">1920x1440</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition-colors">
+                                    <input type="checkbox" 
+                                           x-model="downloadSizes.xl"
+                                           class="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                        XL<br>
+                                        <span class="text-xs text-gray-500">2560x1920</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition-colors">
+                                    <input type="checkbox" 
+                                           x-model="downloadSizes.hd"
+                                           class="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                        HD<br>
+                                        <span class="text-xs text-gray-500">1920x1080</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition-colors">
+                                    <input type="checkbox" 
+                                           x-model="downloadSizes.fourk"
+                                           class="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                        4K<br>
+                                        <span class="text-xs text-gray-500">3840x2160</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition-colors">
+                                    <input type="checkbox" 
+                                           x-model="downloadSizes.insta"
+                                           class="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                        Insta<br>
+                                        <span class="text-xs text-gray-500">1080x1080</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Download as Zip -->
+                        <div class="mb-4" x-show="selectedSizeCount > 1">
+                            <label class="flex items-center gap-2 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 cursor-pointer">
+                                <input type="checkbox" 
+                                       x-model="downloadAsZip"
+                                       class="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500">
+                                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                    <i class="bi bi-file-zip"></i> Download as ZIP file
+                                </span>
+                            </label>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 ml-7">Combine all selected sizes into a single ZIP file for easy downloading</p>
+                        </div>
+
+                        <!-- Selected count info -->
+                        <div class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            <span x-show="selectedSizeCount === 0">Please select at least one size to download.</span>
+                            <span x-show="selectedSizeCount === 1">1 size selected</span>
+                            <span x-show="selectedSizeCount > 1" x-text="`${selectedSizeCount} sizes selected`"></span>
+                        </div>
+                    </div>
+
+                    <!-- Fixed Footer -->
+                    <div class="bg-white dark:bg-gray-800 p-6 border-t border-gray-200 dark:border-gray-700 rounded-b-lg transition-colors duration-300">
+                        <div class="flex gap-3">
+                            <button @click="showDownloadModal = false" 
+                                    class="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg font-semibold transition-colors">
+                                Cancel
+                            </button>
+                            <button @click="executeDownload()" 
+                                    :disabled="selectedSizeCount === 0 || isDownloading"
+                                    :class="selectedSizeCount === 0 || isDownloading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700'"
+                                    class="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2">
+                                <i class="bi" :class="isDownloading ? 'bi-hourglass-split animate-pulse' : 'bi-download'"></i>
+                                <span x-text="isDownloading ? 'Downloading...' : 'Download'"></span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -534,6 +696,27 @@
                 presetDescription: '',
                 loadingPresets: false,
 
+                // === DOWNLOAD OPTIONS ===
+                showDownloadModal: false,
+                downloadFilename: '',
+                downloadSizes: {
+                    thumbnail: false,
+                    sm: false,
+                    md: true,  // Default to MD size
+                    lg: false,
+                    xl: false,
+                    hd: false,
+                    fourk: false,
+                    insta: false
+                },
+                downloadAsZip: false,
+                isDownloading: false,
+
+                // === COMPUTED PROPERTIES ===
+                get selectedSizeCount() {
+                    return Object.values(this.downloadSizes).filter(v => v).length;
+                },
+
                 // === INITIALIZATION ===
                 init() {
                     this.canvas = this.$refs.canvas;
@@ -550,6 +733,13 @@
                     
                     // Load presets from manifest
                     this.loadPresetsFromManifest();
+                    
+                    // Setup keyboard shortcuts
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape' && this.showDownloadModal) {
+                            this.showDownloadModal = false;
+                        }
+                    });
                     
                     // Generate initial pattern
                     this.generate();
@@ -896,11 +1086,139 @@
                     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
                 },
 
-                download() {
+                // === DOWNLOAD FUNCTIONALITY ===
+                async executeDownload() {
+                    if (this.selectedSizeCount === 0) return;
+                    
+                    this.isDownloading = true;
+                    
+                    try {
+                        // Define size configurations
+                        const sizeConfigs = {
+                            thumbnail: { width: 150, height: 113, label: 'thumbnail' },
+                            sm: { width: 640, height: 480, label: 'sm' },
+                            md: { width: 800, height: 600, label: 'md' },
+                            lg: { width: 1920, height: 1440, label: 'lg' },
+                            xl: { width: 2560, height: 1920, label: 'xl' },
+                            hd: { width: 1920, height: 1080, label: 'hd' },
+                            fourk: { width: 3840, height: 2160, label: '4k' },
+                            insta: { width: 1080, height: 1080, label: 'insta' }
+                        };
+                        
+                        // Get base filename
+                        const baseFilename = this.downloadFilename.trim() || `hough-waves-${Date.now()}`;
+                        
+                        // Collect selected sizes
+                        const selectedSizes = Object.entries(this.downloadSizes)
+                            .filter(([key, selected]) => selected)
+                            .map(([key]) => ({ key, ...sizeConfigs[key] }));
+                        
+                        if (selectedSizes.length === 1) {
+                            // Single file download
+                            const size = selectedSizes[0];
+                            const dataUrl = await this.generateImageAtSize(size.width, size.height);
+                            this.downloadFile(dataUrl, `${baseFilename}-${size.label}.png`);
+                        } else if (this.downloadAsZip) {
+                            // Multiple files as ZIP
+                            await this.downloadAsZipFile(selectedSizes, baseFilename);
+                        } else {
+                            // Multiple individual files
+                            for (const size of selectedSizes) {
+                                const dataUrl = await this.generateImageAtSize(size.width, size.height);
+                                this.downloadFile(dataUrl, `${baseFilename}-${size.label}.png`);
+                                // Small delay between downloads to avoid browser blocking
+                                await new Promise(resolve => setTimeout(resolve, 300));
+                            }
+                        }
+                        
+                        // Close modal and reset
+                        this.showDownloadModal = false;
+                    } catch (error) {
+                        console.error('Download error:', error);
+                        alert('An error occurred during download. Please try again.');
+                    } finally {
+                        this.isDownloading = false;
+                    }
+                },
+                
+                async generateImageAtSize(width, height) {
+                    // Create a temporary canvas at the desired size
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = width;
+                    tempCanvas.height = height;
+                    const tempCtx = tempCanvas.getContext('2d');
+                    
+                    // Calculate scaling factor
+                    const scaleX = width / this.canvas.width;
+                    const scaleY = height / this.canvas.height;
+                    
+                    // Clear with appropriate background color
+                    tempCtx.fillStyle = this.darkMode ? '#000000' : '#ffffff';
+                    tempCtx.fillRect(0, 0, width, height);
+                    
+                    // Scale and draw each line
+                    this.lines.forEach((line, idx) => {
+                        const theta = line.theta;
+                        const rho = line.rho;
+                        const color = this.getColor(idx, this.lines.length);
+                        const strength = line.strength;
+                        
+                        const cos = Math.cos(theta);
+                        const sin = Math.sin(theta);
+                        
+                        // Scale rho based on canvas size
+                        const scaledRho = rho * Math.min(scaleX, scaleY);
+                        
+                        let x0 = cos * scaledRho;
+                        let y0 = sin * scaledRho;
+                        
+                        let x1 = x0 - sin * 5000;
+                        let y1 = y0 + cos * 5000;
+                        let x2 = x0 + sin * 5000;
+                        let y2 = y0 - cos * 5000;
+                        
+                        // Apply scaling to coordinates
+                        x1 = x1 * scaleX;
+                        y1 = y1 * scaleY;
+                        x2 = x2 * scaleX;
+                        y2 = y2 * scaleY;
+                        
+                        tempCtx.strokeStyle = color;
+                        tempCtx.globalAlpha = parseFloat(this.opacity) * Math.min(1, strength / 10);
+                        tempCtx.lineWidth = 0.5 * Math.min(scaleX, scaleY);
+                        tempCtx.beginPath();
+                        tempCtx.moveTo(x1, y1);
+                        tempCtx.lineTo(x2, y2);
+                        tempCtx.stroke();
+                        tempCtx.globalAlpha = 1;
+                    });
+                    
+                    return tempCanvas.toDataURL('image/png');
+                },
+                
+                downloadFile(dataUrl, filename) {
                     const link = document.createElement('a');
-                    link.download = `hough-waves-${Date.now()}.png`;
-                    link.href = this.canvas.toDataURL();
+                    link.download = filename;
+                    link.href = dataUrl;
                     link.click();
+                },
+                
+                async downloadAsZipFile(sizes, baseFilename) {
+                    const zip = new JSZip();
+                    
+                    // Generate and add each size to the zip
+                    for (const size of sizes) {
+                        const dataUrl = await this.generateImageAtSize(size.width, size.height);
+                        // Convert data URL to blob
+                        const base64Data = dataUrl.split(',')[1];
+                        zip.file(`${baseFilename}-${size.label}.png`, base64Data, { base64: true });
+                    }
+                    
+                    // Generate and download the zip file
+                    const zipBlob = await zip.generateAsync({ type: 'blob' });
+                    const zipUrl = URL.createObjectURL(zipBlob);
+                    this.downloadFile(zipUrl, `${baseFilename}.zip`);
+                    URL.revokeObjectURL(zipUrl);
                 },
 
                 async copySettingsToClipboard() {
