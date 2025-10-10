@@ -28,12 +28,55 @@ Inspired by the 2004 art project by **Andreas Schjønhaug & Kristoffer Stenersen
 
 ## 🚀 Quick Start
 
-### Try It Now!
+### Try It Live!
+
+**[View the app on GitHub Pages](https://wclaytor.github.io/hough-waves-generator/index.html)** 🌊
+
+This is the easiest way to get started - just click and explore!
+
+### Make It Your Own! (Recommended)
+
+Want to create your own version or customize the app? **Fork or clone this repository**:
+
+1. **Fork this repo** on GitHub (click "Fork" button above)
+2. **Enable GitHub Pages** in your fork's Settings → Pages → Source: main branch
+3. **Access your version** at `https://YOUR-USERNAME.github.io/hough-waves-generator/`
+4. **Share with others** - your GitHub Pages URL works anywhere!
+5. **Customize** - edit the code and push changes to see them live
+
+**Why this approach?**
+- ✅ Presets work correctly (they load from the `presets/` folder)
+- ✅ Easy to share your customized version
+- ✅ Free hosting via GitHub Pages
+- ✅ Version control for your changes
+
+### Alternative: Download for Offline Use
+
+**Basic functionality** works offline, but with limitations:
 
 1. **Download** `index.html` from this repository
-2. **Double-click** to open in your browser (works offline!)
-3. **Experiment** with the controls to create unique art
-4. **Download** your creations as PNG files
+2. **Double-click** to open in your browser
+3. **Create art** with manual controls
+
+**Note**: Presets won't load when opening as a local file due to browser security restrictions. For full functionality including presets, use GitHub Pages or run a local web server (see "For Developers" below).
+
+### For Developers: Local Server
+
+To test locally with all features (including presets):
+
+```bash
+# Clone the repository
+git clone https://github.com/wclaytor/hough-waves-generator.git
+cd hough-waves-generator
+
+# Start a local web server (choose one):
+python -m http.server 8000
+# OR
+npx http-server
+# OR use VS Code's Live Server extension
+
+# Open http://localhost:8000 in your browser
+```
 
 ### Instant Examples
 

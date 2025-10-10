@@ -3,11 +3,27 @@
 ## Try It Now! (30 Seconds)
 
 ### Step 1: Open the App
+
+**Easiest Way: GitHub Pages** (recommended)
+- **[Click here to open the app](https://wclaytor.github.io/hough-waves-generator/index.html)** 🌊
+- All features work, including presets!
+
+**Alternative: Local File** (limited features)
 ```bash
-# Just open index.html in your browser
+# Download index.html and open in your browser
 # - Double-click the file, OR
 # - Drag it to your browser, OR
 # - Right-click → Open With → Browser
+# Note: Presets won't load from local files
+```
+
+**For Full Local Development:**
+```bash
+# Clone the repo and run a web server
+git clone https://github.com/wclaytor/hough-waves-generator.git
+cd hough-waves-generator
+python -m http.server 8000
+# Open http://localhost:8000
 ```
 
 ### Step 2: Watch It Work
@@ -140,9 +156,18 @@ It's the same algorithm used in computer vision for detecting shapes in images!
 ## Next Steps
 
 ### Share Your Art
-- Download PNG images to share on social media
-- Email the entire `index.html` file to friends
-- Host it on GitHub Pages for online access
+- **Download PNG images** to share on social media
+- **Share the GitHub Pages URL** with friends: `https://wclaytor.github.io/hough-waves-generator/`
+- **Create your own version**: Fork this repo and enable GitHub Pages to host your customized version
+
+### Make It Your Own
+Want to customize the app or experiment with the code?
+
+1. **Fork** this repository on GitHub
+2. **Enable GitHub Pages** in Settings → Pages → Source: main branch
+3. **Your URL**: `https://YOUR-USERNAME.github.io/hough-waves-generator/`
+4. **Edit** the code and push changes - they'll appear live on your GitHub Pages site!
+5. **Share** your customized version with others
 
 ### Learn More
 - Read [IMPLEMENTATION.md](IMPLEMENTATION.md) for technical details
