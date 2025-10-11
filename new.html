@@ -34,3 +34,1706 @@
     
     <style>
         [x-cloak] { display: none !important; }
+        
+        /* Dark mode transitions */
+        * {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* Lock mode: Calculate sticky canvas position below header (no gap) */
+        .locked-canvas {
+            top: var(--header-height, 100px);
+        }
+    </style>
+</head>
+<body>
+    <div x-data="houghWaves()" x-cloak :class="darkMode ? 'dark' : ''" class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+        <div class="container mx-auto p-4 md:p-6 max-w-7xl">
+            <!-- Header -->
+            <header x-ref="header" :class="isLocked ? 'sticky top-0 z-40 mb-0 rounded-t-lg rounded-b-none' : 'mb-4 md:mb-6 rounded-lg'" class="bg-white dark:bg-gray-800 shadow-md p-4 md:p-6 transition-colors duration-300">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div>
+                        <h1 class="text-2xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+                            <i class="bi bi-tsunami text-blue-500"></i>
+                            Hough Waves
+                        </h1>
+                        <p class="text-sm md:text-base text-gray-600 dark:text-gray-300">Algorithmic Art Generator</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button 
+                            @click="copyShareLink()"
+                            class="p-3 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                            title="Copy share link to clipboard">
+                            <i class="bi bi-share text-xl"></i>
+                        </button>
+                        <button 
+                            @click="toggleLock()"
+                            class="p-3 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                            :title="isLocked ? 'Unlock titlebar and canvas' : 'Lock titlebar and canvas'">
+                            <i x-show="!isLocked" class="bi bi-unlock text-xl"></i>
+                            <i x-show="isLocked" class="bi bi-lock-fill text-xl"></i>
+                        </button>
+                        <button 
+                            @click="toggleDarkMode()"
+                            class="p-3 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                            title="Toggle dark mode">
+                            <i x-show="!darkMode" class="bi bi-moon text-xl"></i>
+                            <i x-show="darkMode" class="bi bi-sun text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Canvas Section -->
+            <div :class="isLocked ? 'sticky locked-canvas z-30 rounded-b-lg rounded-t-none' : 'rounded-lg'" x-ref="canvasSection" class="bg-white dark:bg-gray-800 shadow-md p-4 md:p-6 mb-4 md:mb-6 transition-colors duration-300" x-init="$watch('isLocked', () => { if (isLocked && $refs.header) { $el.style.setProperty('--header-height', $refs.header.offsetHeight + 'px'); } })">
+                <canvas x-ref="canvas" 
+                        width="800" 
+                        height="600" 
+                        :class="darkMode ? 'bg-black' : 'bg-white'"
+                        class="w-full rounded shadow-lg cursor-crosshair transition-colors duration-300"
+                        style="max-height: 70vh;"></canvas>
+            </div>
+
+            <!-- Controls Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4 md:mb-6">
+                <!-- Presets -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-stars text-amber-500"></i>
+                        Presets
+                    </h3>
+                    <select x-model="selectedPreset" @change="applyPreset()" 
+                            class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2">
+                        <option value="">-- Select a Preset --</option>
+                        <template x-for="preset in presets" :key="preset.id">
+                            <option :value="preset.id" x-text="preset.name" style="text-transform: capitalize;"></option>
+                        </template>
+                    </select>
+                    <div x-show="presetDescription" class="text-sm text-gray-600 dark:text-gray-400 mt-2 italic" x-text="presetDescription"></div>
+                </div>
+
+                <!-- Pattern Controls -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-bezier2 text-purple-500"></i>
+                        Pattern Type
+                    </h3>
+                    <select x-model="pattern" @change="generate()" 
+                            class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="wave">Wave</option>
+                        <option value="spiral">Spiral</option>
+                        <option value="circle">Circle</option>
+                        <option value="grid">Grid</option>
+                        <option value="random">Random</option>
+                        <option value="wave-field">Wave Field</option>
+                    </select>
+                </div>
+
+                <!-- Wave Pattern Parameters -->
+                <div x-show="pattern === 'wave'" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-tsunami text-purple-500"></i>
+                        Wave Parameters
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-gray-600 dark:text-gray-400 text-sm">Frequency: <span class="font-semibold" x-text="waveFrequency"></span></label>
+                            <input type="range" x-model.number="waveFrequency" min="0.1" max="10" step="0.1"
+                                   @input="generate()" class="w-full">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Number of wave cycles across the canvas</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 dark:text-gray-400 text-sm">Amplitude: <span class="font-semibold" x-text="waveAmplitude + 'px'"></span></label>
+                            <input type="range" x-model.number="waveAmplitude" min="1" max="250" step="1"
+                                   @input="generate()" class="w-full">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Height of the wave peaks</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spiral Pattern Parameters -->
+                <div x-show="pattern === 'spiral'" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-arrow-clockwise text-purple-500"></i>
+                        Spiral Parameters
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-gray-600 dark:text-gray-400 text-sm">Rotations: <span class="font-semibold" x-text="spiralRotations"></span></label>
+                            <input type="range" x-model.number="spiralRotations" min="1" max="10" step="0.5"
+                                   @input="generate()" class="w-full">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Number of complete rotations in the spiral</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 dark:text-gray-400 text-sm">Radius: <span class="font-semibold" x-text="(spiralRadius * 100).toFixed(0) + '%'"></span></label>
+                            <input type="range" x-model.number="spiralRadius" min="0.2" max="0.5" step="0.05"
+                                   @input="generate()" class="w-full">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Size of the spiral relative to canvas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Circle Pattern Parameters -->
+                <div x-show="pattern === 'circle'" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-circle text-purple-500"></i>
+                        Circle Parameters
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-gray-600 dark:text-gray-400 text-sm">Radius: <span class="font-semibold" x-text="(circleRadius * 100).toFixed(0) + '%'"></span></label>
+                            <input type="range" x-model.number="circleRadius" min="0.1" max="0.5" step="0.05"
+                                   @input="generate()" class="w-full">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Size of the circle relative to canvas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wave Field Pattern Parameters -->
+                <div x-show="pattern === 'wave-field'" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-water text-purple-500"></i>
+                        Wave Field Parameters
+                    </h3>
+                    
+                    <!-- Info Box -->
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-3 rounded-lg mb-4 border border-blue-200 dark:border-blue-800">
+                        <p class="text-xs text-blue-800 dark:text-blue-200 leading-relaxed">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Wave Field:</strong> Generates points along sinusoidal wave curves, then applies the Hough Transform to detect emergent line patterns. All controls (Points, Threshold, Resolution) affect the detection process.
+                        </p>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-gray-600 dark:text-gray-400 text-sm">Wave Count: <span class="font-semibold" x-text="houghWaveCount"></span></label>
+                            <input type="range" x-model.number="houghWaveCount" min="5" max="40" step="1"
+                                   @input="generate()" class="w-full">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Number of horizontal wave lines</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 dark:text-gray-400 text-sm">Amplitude: <span class="font-semibold" x-text="houghAmplitude + 'px'"></span></label>
+                            <input type="range" x-model.number="houghAmplitude" min="10" max="200" step="5"
+                                   @input="generate()" class="w-full">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Height of wave oscillations</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 dark:text-gray-400 text-sm">Frequency: <span class="font-semibold" x-text="houghFrequency.toFixed(1)"></span></label>
+                            <input type="range" x-model.number="houghFrequency" min="0.5" max="8" step="0.1"
+                                   @input="generate()" class="w-full">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Number of wave cycles across canvas</p>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 dark:text-gray-400 text-sm">Wave Morph: <span class="font-semibold" x-text="(houghMorphProgress * 100).toFixed(0) + '%'"></span></label>
+                            <input type="range" x-model.number="houghMorphProgress" min="0" max="1" step="0.01"
+                                   @input="generate()" class="w-full">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Blend from straight lines (0%) to full waves (100%)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Points Control -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                            <i class="bi bi-circle-fill text-blue-500"></i>
+                            Points: <span x-text="numPoints"></span>
+                        </h3>
+                        <div class="flex items-center gap-1">
+                            <button @click="decrementPoints()"
+                                    class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                                    title="Decrease by 1">
+                                <i class="bi bi-dash text-lg"></i>
+                            </button>
+                            <button @click="incrementPoints()"
+                                    class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                                    title="Increase by 1">
+                                <i class="bi bi-plus text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <input type="range" x-model="numPoints" min="10" max="150" step="5"
+                           @input="generate()" 
+                           class="w-full">
+                </div>
+
+                <!-- Threshold Control -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                            <i class="bi bi-sliders text-green-500"></i>
+                            Threshold: <span x-text="threshold"></span>
+                        </h3>
+                        <div class="flex items-center gap-1">
+                            <button @click="decrementThreshold()"
+                                    class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                                    title="Decrease by 1">
+                                <i class="bi bi-dash text-lg"></i>
+                            </button>
+                            <button @click="incrementThreshold()"
+                                    class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                                    title="Increase by 1">
+                                <i class="bi bi-plus text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <input type="range" x-model="threshold" min="5" max="50" step="1"
+                           @input="generate()" 
+                           class="w-full">
+                </div>
+
+                <!-- Theta Resolution Control -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                            <i class="bi bi-diagram-3 text-indigo-500"></i>
+                            Resolution: <span x-text="thetaStep + '°'"></span>
+                        </h3>
+                        <div class="flex items-center gap-1">
+                            <button @click="decrementResolution()"
+                                    class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                                    title="Decrease by 0.1">
+                                <i class="bi bi-dash text-lg"></i>
+                            </button>
+                            <button @click="incrementResolution()"
+                                    class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                                    title="Increase by 0.1">
+                                <i class="bi bi-plus text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <input type="range" x-model.number="thetaStep" min="0.1" max="5" step="0.1"
+                           @input="generate()" 
+                           class="w-full">
+                </div>
+
+                <!-- Opacity Control -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                            <i class="bi bi-droplet text-cyan-500"></i>
+                            Opacity: <span x-text="(opacity * 100).toFixed(0) + '%'"></span>
+                        </h3>
+                        <div class="flex items-center gap-1">
+                            <button @click="decrementOpacity()"
+                                    class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                                    title="Decrease by 0.01">
+                                <i class="bi bi-dash text-lg"></i>
+                            </button>
+                            <button @click="incrementOpacity()"
+                                    class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                                    title="Increase by 0.01">
+                                <i class="bi bi-plus text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <input type="range" x-model.number="opacity" min="0.01" max="1.0" step="0.01"
+                           @input="render()" 
+                           class="w-full">
+                </div>
+
+                <!-- Color Mode Control -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-palette text-pink-500"></i>
+                        Color Mode
+                    </h3>
+                    <select x-model="colorMode" @change="render()" 
+                            class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="arctic">Arctic</option>
+                        <option value="autumn">Autumn</option>
+                        <option value="awakening">Awakening</option>
+                        <option value="bronze">Bronze</option>
+                        <option value="california">California Dreaming</option>
+                        <option value="campfire">Campfire</option>
+                        <option value="concrete">Concrete</option>
+                        <option value="copper">Copper</option>
+                        <option value="desert">Desert Bloom</option>
+                        <option value="fire">Fire</option>
+                        <option value="foolsgold">Fools Gold</option>
+                        <option value="forest">Forest</option>
+                        <option value="galaxy">Galaxy</option>
+                        <option value="glass">Glass</option>
+                        <option value="gradient">Gradient</option>
+                        <option value="hematite">Hematite</option>
+                        <option value="irish">Irish</option>
+                        <option value="lava">Lava</option>
+                        <option value="matrix">Matrix</option>
+                        <option value="midnight">Midnight</option>
+                        <option value="mono">Monochrome</option>
+                        <option value="neon">Neon</option>
+                        <option value="obsidian">Obsidian</option>
+                        <option value="ocean">Ocean</option>
+                        <option value="oldwest">The Old West</option>
+                        <option value="pastel">Pastel</option>
+                        <option value="platinum">Platinum</option>
+                        <option value="rainbow">Rainbow</option>
+                        <option value="rasta">Rasta</option>
+                        <option value="ruby">Ruby</option>
+                        <option value="sand">Sand</option>
+                        <option value="sky">Sky</option>
+                        <option value="spring">Spring</option>
+                        <option value="stainless">Stainless</option>
+                        <option value="sunset">Sunset</option>
+                        <option value="twilight">Twilight</option>
+                        <option value="usa">USA</option>
+                    </select>
+                </div>
+
+                <!-- Stats Display -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="bi bi-graph-up text-orange-500"></i>
+                        Statistics
+                    </h3>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                        <div>Lines drawn: <span class="font-semibold text-gray-800 dark:text-gray-200" x-text="lines.length"></span></div>
+                        <div>Pattern: <span class="font-semibold text-gray-800 dark:text-gray-200" x-text="pattern"></span></div>
+                        <div x-show="useDynamicThreshold" class="text-xs text-purple-600 dark:text-purple-400">
+                            Dynamic threshold: <span x-text="Math.floor(numPoints * thresholdMultiplier)"></span>
+                        </div>
+                        <div class="text-xs mt-2">
+                            <span x-show="useCoarseBinning" class="inline-block bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded mr-1">Coarse</span>
+                            <span x-show="useDynamicThreshold" class="inline-block bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded mr-1">Dynamic</span>
+                            <span x-show="useBlurring" class="inline-block bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 px-2 py-0.5 rounded mr-1">Blur</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Optimization Options -->
+            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950 rounded-lg shadow-md p-6 mb-4 md:mb-6 transition-colors duration-300">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                    <i class="bi bi-gear text-indigo-500"></i>
+                    Advanced Optimization Options
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Option 1: Coarse Binning -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4">
+                        <label class="flex items-center gap-2 mb-3 cursor-pointer">
+                            <input type="checkbox" x-model="useCoarseBinning" @change="generate()" 
+                                   class="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500">
+                            <span class="font-semibold text-gray-800 dark:text-gray-100">Coarse Binning</span>
+                        </label>
+                        <div x-show="useCoarseBinning" class="space-y-3 text-sm">
+                            <div>
+                                <label class="text-gray-600 dark:text-gray-400">Theta Bin: <span x-text="thetaBinSize + '°'"></span></label>
+                                <input type="range" x-model.number="thetaBinSize" min="1" max="10" step="1"
+                                       @input="generate()" class="w-full">
+                            </div>
+                            <div>
+                                <label class="text-gray-600 dark:text-gray-400">Rho Bin: <span x-text="rhoBinSize + 'px'"></span></label>
+                                <input type="range" x-model.number="rhoBinSize" min="2" max="20" step="1"
+                                       @input="generate()" class="w-full">
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            Groups similar lines together. Larger bins = more votes per bin.
+                        </p>
+                    </div>
+                    
+                    <!-- Option 2: Dynamic Threshold -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4">
+                        <label class="flex items-center gap-2 mb-3 cursor-pointer">
+                            <input type="checkbox" x-model="useDynamicThreshold" @change="generate()" 
+                                   class="w-5 h-5 text-purple-600 rounded focus:ring-2 focus:ring-purple-500">
+                            <span class="font-semibold text-gray-800 dark:text-gray-100">Dynamic Threshold</span>
+                        </label>
+                        <div x-show="useDynamicThreshold" class="space-y-3 text-sm">
+                            <div>
+                                <label class="text-gray-600 dark:text-gray-400">Multiplier: <span x-text="(thresholdMultiplier * 100).toFixed(0) + '%'"></span></label>
+                                <input type="range" x-model.number="thresholdMultiplier" min="0.05" max="0.5" step="0.05"
+                                       @input="generate()" class="w-full">
+                            </div>
+                            <div class="text-xs text-gray-600 dark:text-gray-300">
+                                Effective: <span x-text="Math.floor(numPoints * thresholdMultiplier)"></span> votes
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            Scales threshold based on number of points. More points = higher threshold.
+                        </p>
+                    </div>
+                    
+                    <!-- Option 3: Blurring/Averaging -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" x-model="useBlurring" @change="generate()" 
+                                       class="w-5 h-5 text-pink-600 rounded focus:ring-2 focus:ring-pink-500">
+                                <span class="font-semibold text-gray-800 dark:text-gray-100">Vote Blurring</span>
+                            </label>
+                            <div x-show="useBlurring" class="flex items-center gap-1">
+                                <button @click="decrementBlurRadius()"
+                                        class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                                        title="Decrease by 0.1">
+                                    <i class="bi bi-dash text-lg"></i>
+                                </button>
+                                <button @click="incrementBlurRadius()"
+                                        class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 transition-all duration-200 border border-gray-300 dark:border-gray-600"
+                                        title="Increase by 0.1">
+                                    <i class="bi bi-plus text-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div x-show="useBlurring" class="space-y-3 text-sm">
+                            <div>
+                                <label class="text-gray-600 dark:text-gray-400">Blur Radius: <span x-text="blurRadius"></span></label>
+                                <input type="range" x-model.number="blurRadius" min="0.1" max="5" step="0.1"
+                                       @input="generate()" class="w-full">
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            Spreads votes to neighboring bins. Helps similar lines accumulate votes.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button @click="generate()" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3 md:p-4 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Generate New Pattern
+                </button>
+                <button @click="randomize()" 
+                        class="w-full bg-purple-600 hover:bg-purple-700 text-white p-3 md:p-4 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors">
+                    <i class="bi bi-shuffle"></i>
+                    Randomize All
+                </button>
+                <button @click="showDownloadModal = true" 
+                        class="w-full bg-green-600 hover:bg-green-700 text-white p-3 md:p-4 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors">
+                    <i class="bi bi-download"></i>
+                    Download PNG
+                </button>
+            </div>
+
+            <!-- Settings Buttons -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <button @click="copySettingsToClipboard()" 
+                        class="w-full bg-teal-600 hover:bg-teal-700 text-white p-3 md:p-4 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors">
+                    <i class="bi bi-clipboard"></i>
+                    Copy Settings
+                </button>
+                <button @click="exportSettings()" 
+                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-3 md:p-4 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors">
+                    <i class="bi bi-file-earmark-text"></i>
+                    Export Settings
+                </button>
+            </div>
+
+            <!-- Info Section -->
+            <div class="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-300">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
+                    <i class="bi bi-info-circle text-blue-500"></i>
+                    About Hough Waves
+                </h3>
+                <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                    Hough Waves use the <strong>Hough transform algorithm</strong> from computer vision to create stunning generative art. 
+                    Each point generates a sinusoidal curve in parameter space (θ, r), voting for all possible lines through it. 
+                    Lines receiving enough votes (above threshold) are drawn, creating emergent wave-like patterns.
+                </p>
+                <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mt-2">
+                    The <strong>Wave Field</strong> pattern generates points along sinusoidal curves and applies the Hough Transform to detect complex line patterns, 
+                    creating fascinating emergent structures from wave-shaped point distributions.
+                </p>
+                <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mt-2">
+                    Inspired by the 2004 art project by Andreas Schjønhaug & Kristoffer Stenersen at NTNU, Norway.
+                </p>
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs font-medium">Algorithm: Hough Transform</span>
+                    <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium">Alpine.js 3.x</span>
+                    <span class="px-3 py-1 bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 rounded-full text-xs font-medium">Generative Art</span>
+                </div>
+            </div>
+
+            <!-- Download Options Modal -->
+            <div x-show="showDownloadModal" 
+                 @click="showDownloadModal = false"
+                 class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-8 z-50">
+                <div @click.stop 
+                     class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl transition-colors duration-300" 
+                     style="max-height: 90vh">
+                    
+                    <!-- Fixed Header -->
+                    <div class="bg-white dark:bg-gray-800 p-6 border-b border-gray-200 dark:border-gray-700 rounded-t-lg transition-colors duration-300">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">
+                                <i class="bi bi-download text-green-500"></i>
+                                Download Options
+                            </h3>
+                            <button @click="showDownloadModal = false" 
+                                    class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-300">
+                                <i class="bi bi-x text-2xl"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Scrollable Content -->
+                    <div class="bg-gray-50 dark:bg-gray-900 p-6 overflow-y-scroll transition-colors duration-300" 
+                         style="max-height: calc(90vh - 180px)">
+                        
+                        <!-- Custom Filename -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                <i class="bi bi-pencil"></i> Custom Filename
+                            </label>
+                            <input type="text" 
+                                   x-model="downloadFilename"
+                                   placeholder="hough-waves"
+                                   class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Leave empty to use default timestamp-based name</p>
+                        </div>
+
+                        <!-- Download Sizes -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                                <i class="bi bi-aspect-ratio"></i> Download Sizes
+                            </label>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <label class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition-colors">
+                                    <input type="checkbox" 
+                                           x-model="downloadSizes.thumbnail"
+                                           class="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                        Thumbnail<br>
+                                        <span class="text-xs text-gray-500">150x113</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition-colors">
+                                    <input type="checkbox" 
+                                           x-model="downloadSizes.sm"
+                                           class="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                        SM<br>
+                                        <span class="text-xs text-gray-500">640x480</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition-colors">
+                                    <input type="checkbox" 
+                                           x-model="downloadSizes.md"
+                                           class="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                        MD<br>
+                                        <span class="text-xs text-gray-500">800x600</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition-colors">
+                                    <input type="checkbox" 
+                                           x-model="downloadSizes.lg"
+                                           class="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                        LG<br>
+                                        <span class="text-xs text-gray-500">1920x1440</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition-colors">
+                                    <input type="checkbox" 
+                                           x-model="downloadSizes.xl"
+                                           class="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                        XL<br>
+                                        <span class="text-xs text-gray-500">2560x1920</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition-colors">
+                                    <input type="checkbox" 
+                                           x-model="downloadSizes.hd"
+                                           class="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                        HD<br>
+                                        <span class="text-xs text-gray-500">1920x1080</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition-colors">
+                                    <input type="checkbox" 
+                                           x-model="downloadSizes.fourk"
+                                           class="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                        4K<br>
+                                        <span class="text-xs text-gray-500">3840x2160</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer hover:border-green-500 dark:hover:border-green-500 transition-colors">
+                                    <input type="checkbox" 
+                                           x-model="downloadSizes.insta"
+                                           class="w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                                        Insta<br>
+                                        <span class="text-xs text-gray-500">1080x1080</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Download as Zip -->
+                        <div class="mb-4" x-show="selectedSizeCount > 1">
+                            <label class="flex items-center gap-2 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 cursor-pointer">
+                                <input type="checkbox" 
+                                       x-model="downloadAsZip"
+                                       class="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500">
+                                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                    <i class="bi bi-file-zip"></i> Download as ZIP file
+                                </span>
+                            </label>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 ml-7">Combine all selected sizes into a single ZIP file for easy downloading</p>
+                        </div>
+
+                        <!-- Selected count info -->
+                        <div class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            <span x-show="selectedSizeCount === 0">Please select at least one size to download.</span>
+                            <span x-show="selectedSizeCount === 1">1 size selected</span>
+                            <span x-show="selectedSizeCount > 1" x-text="`${selectedSizeCount} sizes selected`"></span>
+                        </div>
+                    </div>
+
+                    <!-- Fixed Footer -->
+                    <div class="bg-white dark:bg-gray-800 p-6 border-t border-gray-200 dark:border-gray-700 rounded-b-lg transition-colors duration-300">
+                        <div class="flex gap-3">
+                            <button @click="showDownloadModal = false" 
+                                    class="flex-1 px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg font-semibold transition-colors">
+                                Cancel
+                            </button>
+                            <button @click="executeDownload()" 
+                                    :disabled="selectedSizeCount === 0 || isDownloading"
+                                    :class="selectedSizeCount === 0 || isDownloading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700'"
+                                    class="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2">
+                                <i class="bi" :class="isDownloading ? 'bi-hourglass-split animate-pulse' : 'bi-download'"></i>
+                                <span x-text="isDownloading ? 'Downloading...' : 'Download'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function houghWaves() {
+            return {
+                // === STATE ===
+                numPoints: 50,
+                threshold: 15,
+                pattern: 'wave',
+                opacity: 0.05,
+                colorMode: 'mono',
+                lines: [],
+                darkMode: false,
+                isLocked: false,
+                canvas: null,
+                ctx: null,
+                thetaStep: 1, // Resolution of theta sampling (degrees)
+                
+                // === PATTERN-SPECIFIC PARAMETERS ===
+                // Wave pattern
+                waveFrequency: 4,    // Number of wave cycles (0.1-10)
+                waveAmplitude: 150,  // Wave height in pixels (1-250)
+                
+                // Spiral pattern
+                spiralRotations: 6,  // Number of rotations (1-10)
+                spiralRadius: 0.4,   // Radius multiplier (0.2-0.5)
+                
+                // Circle pattern
+                circleRadius: 0.3,   // Radius multiplier (0.1-0.5)
+                
+                // Wave Field pattern - generates points along sinusoidal curves
+                houghWaveCount: 15,      // Number of horizontal waves (5-40)
+                houghAmplitude: 100,     // Wave amplitude in pixels (10-200)
+                houghFrequency: 2,       // Number of wave cycles (0.5-8)
+                houghMorphProgress: 1.0, // Morph from lines to waves (0.0-1.0)
+                
+                // === OPTIMIZATION OPTIONS ===
+                useCoarseBinning: false,
+                thetaBinSize: 1,  // Degrees per bin (when coarse binning enabled)
+                rhoBinSize: 2,    // Pixels per bin (when coarse binning enabled)
+                useDynamicThreshold: false,
+                thresholdMultiplier: 0.2,  // Percentage of points
+                useBlurring: false,
+                blurRadius: 0.1,    // Number of neighboring bins to blur into
+
+                // === PRESETS ===
+                presets: [],
+                selectedPreset: '',
+                presetDescription: '',
+                loadingPresets: false,
+
+                // === DOWNLOAD OPTIONS ===
+                showDownloadModal: false,
+                downloadFilename: '',
+                downloadSizes: {
+                    thumbnail: false,
+                    sm: false,
+                    md: true,  // Default to MD size
+                    lg: false,
+                    xl: false,
+                    hd: false,
+                    fourk: false,
+                    insta: false
+                },
+                downloadAsZip: false,
+                isDownloading: false,
+
+                // === COMPUTED PROPERTIES ===
+                get selectedSizeCount() {
+                    return Object.values(this.downloadSizes).filter(v => v).length;
+                },
+
+                // === INITIALIZATION ===
+                init() {
+                    this.canvas = this.$refs.canvas;
+                    this.ctx = this.canvas.getContext('2d');
+                    
+                    // Load dark mode preference
+                    const savedDarkMode = localStorage.getItem('hough-waves-darkMode');
+                    this.darkMode = savedDarkMode === 'true';
+                    this.updateDarkMode();
+                    
+                    // Load lock preference
+                    const savedLocked = localStorage.getItem('hough-waves-locked');
+                    this.isLocked = savedLocked === 'true';
+                    
+                    // Load presets from manifest
+                    this.loadPresetsFromManifest();
+                    
+                    // Setup keyboard shortcuts
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape' && this.showDownloadModal) {
+                            this.showDownloadModal = false;
+                        }
+                    });
+                    
+                    // Generate initial pattern
+                    this.generate();
+                },
+
+                // === DARK MODE ===
+                toggleDarkMode() {
+                    this.darkMode = !this.darkMode;
+                    this.updateDarkMode();
+                    localStorage.setItem('hough-waves-darkMode', this.darkMode.toString());
+                    // Re-render with new theme colors
+                    this.render();
+                },
+
+                updateDarkMode() {
+                    if (this.darkMode) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                },
+
+                // === LOCK MODE ===
+                toggleLock() {
+                    this.isLocked = !this.isLocked;
+                    localStorage.setItem('hough-waves-locked', this.isLocked.toString());
+                },
+
+                // === POINTS CONTROL ===
+                incrementPoints() {
+                    if (this.numPoints < 150) {
+                        this.numPoints++;
+                        this.generate();
+                    }
+                },
+
+                decrementPoints() {
+                    if (this.numPoints > 10) {
+                        this.numPoints--;
+                        this.generate();
+                    }
+                },
+
+                // === THRESHOLD CONTROL ===
+                incrementThreshold() {
+                    if (this.threshold < 50) {
+                        this.threshold++;
+                        this.generate();
+                    }
+                },
+
+                decrementThreshold() {
+                    if (this.threshold > 5) {
+                        this.threshold--;
+                        this.generate();
+                    }
+                },
+
+                // === RESOLUTION CONTROL ===
+                incrementResolution() {
+                    if (this.thetaStep < 5) {
+                        this.thetaStep = Math.round((this.thetaStep + 0.1) * 10) / 10;
+                        this.generate();
+                    }
+                },
+
+                decrementResolution() {
+                    if (this.thetaStep > 0.1) {
+                        this.thetaStep = Math.round((this.thetaStep - 0.1) * 10) / 10;
+                        this.generate();
+                    }
+                },
+
+                // === OPACITY CONTROL ===
+                incrementOpacity() {
+                    if (this.opacity < 1.0) {
+                        this.opacity = Math.round((this.opacity + 0.01) * 100) / 100;
+                        this.render();
+                    }
+                },
+
+                decrementOpacity() {
+                    if (this.opacity > 0.01) {
+                        this.opacity = Math.round((this.opacity - 0.01) * 100) / 100;
+                        this.render();
+                    }
+                },
+
+                // === BLUR RADIUS CONTROL ===
+                incrementBlurRadius() {
+                    if (this.blurRadius < 5) {
+                        this.blurRadius = Math.round((this.blurRadius + 0.1) * 10) / 10;
+                        this.generate();
+                    }
+                },
+
+                decrementBlurRadius() {
+                    if (this.blurRadius > 0.1) {
+                        this.blurRadius = Math.round((this.blurRadius - 0.1) * 10) / 10;
+                        this.generate();
+                    }
+                },
+
+                // === MAIN GENERATION ===
+                generate() {
+                    this.clear();
+                    
+                    // All patterns now use the Hough Transform algorithm
+                    const points = this.createPoints();
+                    this.lines = this.computeHoughTransform(points);
+                    this.render();
+                },
+
+                // === POINT GENERATION ===
+                createPoints() {
+                    const points = [];
+                    const n = parseInt(this.numPoints);
+                    const w = this.canvas.width;
+                    const h = this.canvas.height;
+                    const centerY = h / 2;
+                    
+                    const patterns = {
+                        wave: (i) => ({
+                            x: (i/n) * w,
+                            y: h/2 + Math.sin(i/n * Math.PI * this.waveFrequency) * this.waveAmplitude
+                        }),
+                        spiral: (i) => {
+                            const angle = (i/n) * Math.PI * this.spiralRotations;
+                            const radius = (i/n) * Math.min(w, h) * this.spiralRadius;
+                            return {
+                                x: w/2 + Math.cos(angle) * radius,
+                                y: h/2 + Math.sin(angle) * radius
+                            };
+                        },
+                        circle: (i) => {
+                            const angle = (i/n) * Math.PI * 2;
+                            const radius = Math.min(w, h) * this.circleRadius;
+                            return {
+                                x: w/2 + Math.cos(angle) * radius,
+                                y: h/2 + Math.sin(angle) * radius
+                            };
+                        },
+                        grid: (i) => {
+                            const cols = Math.ceil(Math.sqrt(n));
+                            return {
+                                x: ((i % cols) / cols) * w,
+                                y: (Math.floor(i / cols) / cols) * h
+                            };
+                        },
+                        random: (i) => ({
+                            x: Math.random() * w,
+                            y: Math.random() * h
+                        }),
+                        'wave-field': (i) => {
+                            // Generate points along multiple sinusoidal wave lines
+                            // Distribute points across all waves
+                            const numWaves = this.houghWaveCount;
+                            const waveIndex = Math.floor((i / n) * numWaves);
+                            const progressInWave = ((i / n) * numWaves) % 1;
+                            
+                            // Calculate x position along the wave
+                            const x = progressInWave * w;
+                            
+                            // Calculate y position using wave parameters
+                            const spacing = (h * 0.8) / (numWaves - 1);
+                            const startY = h * 0.1;
+                            
+                            // Linear position (straight horizontal line)
+                            const linearY = startY + waveIndex * spacing;
+                            
+                            // Sinusoidal position (wave)
+                            const sineY = centerY + Math.sin((x / w) * Math.PI * 2 * this.houghFrequency + waveIndex * 0.5) * this.houghAmplitude;
+                            
+                            // Blend between linear and sine based on morphProgress
+                            const y = linearY * (1 - this.houghMorphProgress) + sineY * this.houghMorphProgress;
+                            
+                            return { x, y };
+                        }
+                    };
+                    
+                    for (let i = 0; i < n; i++) {
+                        const point = patterns[this.pattern](i);
+                        // Add slight noise for organic feel (except for random pattern)
+                        if (this.pattern !== 'random') {
+                            point.x += (Math.random() - 0.5) * 20;
+                            point.y += (Math.random() - 0.5) * 20;
+                        }
+                        points.push(point);
+                    }
+                    
+                    return points;
+                },
+
+                // === HOUGH TRANSFORM ===
+                computeHoughTransform(points) {
+                    const accumulator = new Map();
+                    const lines = [];
+                    const w = this.canvas.width;
+                    const h = this.canvas.height;
+                    const maxRho = Math.sqrt(w * w + h * h);
+                    
+                    // Determine binning sizes (Option 1: Coarse Binning)
+                    const thetaBinSize = this.useCoarseBinning ? this.thetaBinSize : 1;
+                    const rhoBinSize = this.useCoarseBinning ? this.rhoBinSize : 2;
+                    
+                    // Helper function to cast a vote (with optional blurring)
+                    const castVote = (thetaKey, rhoKey, weight = 1) => {
+                        const key = `${thetaKey},${rhoKey}`;
+                        const count = (accumulator.get(key) || 0) + weight;
+                        accumulator.set(key, count);
+                    };
+                    
+                    // For each point, vote for all possible lines through it
+                    points.forEach(point => {
+                        // Vary theta from -90 to +90 degrees
+                        for (let thetaDeg = -90; thetaDeg <= 90; thetaDeg += this.thetaStep) {
+                            const theta = thetaDeg * Math.PI / 180;
+                            
+                            // Calculate r = x*cos(θ) + y*sin(θ)
+                            const rho = point.x * Math.cos(theta) + point.y * Math.sin(theta);
+                            
+                            // Quantize theta and rho for binning
+                            const thetaKey = Math.round(thetaDeg / thetaBinSize) * thetaBinSize;
+                            const rhoKey = Math.round(rho / rhoBinSize) * rhoBinSize;
+                            
+                            // Cast primary vote
+                            castVote(thetaKey, rhoKey, 1.0);
+                            
+                            // Option 3: Vote Blurring - spread vote to neighboring bins
+                            if (this.useBlurring) {
+                                const radius = this.blurRadius;
+                                for (let dt = -radius; dt <= radius; dt++) {
+                                    for (let dr = -radius; dr <= radius; dr++) {
+                                        if (dt === 0 && dr === 0) continue; // Skip center (already voted)
+                                        
+                                        const neighborTheta = thetaKey + (dt * thetaBinSize);
+                                        const neighborRho = rhoKey + (dr * rhoBinSize);
+                                        
+                                        // Gaussian-like weight: closer neighbors get more weight
+                                        const distance = Math.sqrt(dt * dt + dr * dr);
+                                        const weight = Math.exp(-distance * distance / (2 * radius * radius)) * 0.5;
+                                        
+                                        castVote(neighborTheta, neighborRho, weight);
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Option 2: Dynamic Threshold - scale based on number of points
+                    const threshold = this.useDynamicThreshold 
+                        ? Math.max(5, Math.floor(points.length * this.thresholdMultiplier))
+                        : parseInt(this.threshold);
+                    
+                    // Find lines that exceed threshold
+                    accumulator.forEach((votes, key) => {
+                        if (votes >= threshold) {
+                            const [thetaKey, rhoKey] = key.split(',').map(Number);
+                            const theta = thetaKey * Math.PI / 180;
+                            const rho = rhoKey;
+                            lines.push({ theta, rho, strength: votes });
+                        }
+                    });
+                    
+                    // Sort by strength for better rendering
+                    lines.sort((a, b) => a.strength - b.strength);
+                    
+                    return lines;
+                },
+
+                // === RENDERING ===
+                render() {
+                    this.clear();
+                    this.lines.forEach((line, idx) => {
+                        this.drawLine(
+                            line.theta, 
+                            line.rho, 
+                            this.getColor(idx, this.lines.length),
+                            line.strength
+                        );
+                    });
+                },
+
+                drawLine(theta, rho, color, strength) {
+                    const cos = Math.cos(theta);
+                    const sin = Math.sin(theta);
+                    
+                    let x0 = cos * rho;
+                    let y0 = sin * rho;
+                    
+                    let x1 = x0 - sin * 1000;
+                    let y1 = y0 + cos * 1000;
+                    let x2 = x0 + sin * 1000;
+                    let y2 = y0 - cos * 1000;
+                    
+                    this.ctx.strokeStyle = color;
+                    this.ctx.globalAlpha = parseFloat(this.opacity) * Math.min(1, strength / 10);
+                    this.ctx.lineWidth = 0.5;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x1, y1);
+                    this.ctx.lineTo(x2, y2);
+                    this.ctx.stroke();
+                    this.ctx.globalAlpha = 1;
+                },
+
+                // === COLOR MODES ===
+                getColor(index, total) {
+                    const modes = {
+                        mono: () => this.darkMode ? '#ffffff' : '#000000',
+                        rainbow: () => `hsl(${(index/total) * 360}, 70%, ${this.darkMode ? 60 : 40}%)`,
+                        gradient: () => {
+                            const t = index / total;
+                            if (this.darkMode) {
+                                return `rgb(${255*t}, ${255*(1-t)}, 255)`;
+                            } else {
+                                return `rgb(${200*t}, ${200*(1-t)}, 200)`;
+                            }
+                        },
+                        ocean: () => `hsl(${180 + (index/total) * 60}, 70%, ${this.darkMode ? 60 : 40}%)`,
+                        fire: () => `hsl(${(index/total) * 60}, 80%, ${this.darkMode ? 60 : 40}%)`,
+                        sunset: () => `hsl(${(index/total) * 60 + 320}, 85%, ${this.darkMode ? 65 : 50}%)`,
+                        forest: () => `hsl(${(index/total) * 60 + 80}, 60%, ${this.darkMode ? 50 : 35}%)`,
+                        neon: () => `hsl(${(index/total) * 360}, 100%, ${this.darkMode ? 70 : 50}%)`,
+                        pastel: () => `hsl(${(index/total) * 360}, 60%, ${this.darkMode ? 75 : 80}%)`,
+                        midnight: () => `hsl(${220 + (index/total) * 80}, 70%, ${this.darkMode ? 50 : 30}%)`,
+                        autumn: () => `hsl(${(index/total) * 60 + 10}, 75%, ${this.darkMode ? 55 : 45}%)`,
+                        spring: () => `hsl(${(index/total) * 90 + 60}, 70%, ${this.darkMode ? 60 : 50}%)`,
+                        galaxy: () => `hsl(${(index/total) * 100 + 260}, 80%, ${this.darkMode ? 65 : 45}%)`,
+                        lava: () => `hsl(${(index/total) * 40}, 90%, ${this.darkMode ? 50 : 40}%)`,
+                        arctic: () => `hsl(${180 + (index/total) * 40}, 50%, ${this.darkMode ? 70 : 75}%)`,
+                        // New color modes
+                        awakening: () => `hsl(${270 + (index/total) * 60}, 75%, ${this.darkMode ? 60 : 50}%)`,
+                        bronze: () => `hsl(${25 + (index/total) * 15}, 60%, ${this.darkMode ? 50 : 40}%)`,
+                        california: () => `hsl(${310 + (index/total) * 50}, 80%, ${this.darkMode ? 65 : 55}%)`,
+                        campfire: () => `hsl(${15 + (index/total) * 30}, 85%, ${this.darkMode ? 55 : 50}%)`,
+                        concrete: () => `hsl(30, ${5 + (index/total) * 10}%, ${this.darkMode ? 65 : 55}%)`,
+                        copper: () => `hsl(${15 + (index/total) * 15}, 80%, ${this.darkMode ? 60 : 50}%)`,
+                        desert: () => `hsl(${10 + (index/total) * 50}, 80%, ${this.darkMode ? 65 : 55}%)`,
+                        foolsgold: () => `hsl(${45 + (index/total) * 15}, 90%, ${this.darkMode ? 65 : 55}%)`,
+                        glass: () => `hsl(${200 + (index/total) * 20}, 50%, ${this.darkMode ? 80 : 75}%)`,
+                        hematite: () => `hsl(${(index/total) * 20}, 30%, ${this.darkMode ? 35 : 25}%)`,
+                        irish: () => {
+                            const colors = ['hsl(120, 60%, 45%)', 'hsl(0, 0%, 100%)', 'hsl(30, 100%, 50%)'];
+                            return colors[index % 3];
+                        },
+                        matrix: () => `hsl(${120 + (index/total) * 20}, 100%, ${this.darkMode ? 50 : 40}%)`,
+                        obsidian: () => `hsl(${260 + (index/total) * 30}, 40%, ${this.darkMode ? 25 : 15}%)`,
+                        oldwest: () => `hsl(${25 + (index/total) * 25}, 45%, ${this.darkMode ? 45 : 35}%)`,
+                        platinum: () => `hsl(200, 10%, ${this.darkMode ? 85 : 75}%)`,
+                        rasta: () => {
+                            const colors = ['hsl(0, 100%, 50%)', 'hsl(60, 100%, 50%)', 'hsl(120, 100%, 35%)'];
+                            return colors[index % 3];
+                        },
+                        ruby: () => `hsl(${340 + (index/total) * 30}, 85%, ${this.darkMode ? 55 : 45}%)`,
+                        sand: () => `hsl(${40 + (index/total) * 20}, 50%, ${this.darkMode ? 70 : 60}%)`,
+                        sky: () => `hsl(${190 + (index/total) * 30}, 60%, ${this.darkMode ? 75 : 70}%)`,
+                        stainless: () => `hsl(210, 15%, ${this.darkMode ? 65 : 55}%)`,
+                        twilight: () => `hsl(${260 + (index/total) * 40}, 60%, ${this.darkMode ? 45 : 35}%)`,
+                        usa: () => {
+                            const colors = ['hsl(220, 100%, 50%)', 'hsl(0, 0%, 100%)', 'hsl(0, 100%, 50%)'];
+                            return colors[index % 3];
+                        }
+                    };
+                    
+                    return modes[this.colorMode]();
+                },
+
+                // === UTILITIES ===
+                clear() {
+                    // Use light background in light mode, dark in dark mode
+                    this.ctx.fillStyle = this.darkMode ? '#000000' : '#ffffff';
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                },
+
+                // === DOWNLOAD FUNCTIONALITY ===
+                async executeDownload() {
+                    if (this.selectedSizeCount === 0) return;
+                    
+                    this.isDownloading = true;
+                    
+                    try {
+                        // Define size configurations
+                        const sizeConfigs = {
+                            thumbnail: { width: 150, height: 113, label: 'thumbnail' },
+                            sm: { width: 640, height: 480, label: 'sm' },
+                            md: { width: 800, height: 600, label: 'md' },
+                            lg: { width: 1920, height: 1440, label: 'lg' },
+                            xl: { width: 2560, height: 1920, label: 'xl' },
+                            hd: { width: 1920, height: 1080, label: 'hd' },
+                            fourk: { width: 3840, height: 2160, label: '4k' },
+                            insta: { width: 1080, height: 1080, label: 'insta' }
+                        };
+                        
+                        // Get base filename
+                        const baseFilename = this.downloadFilename.trim() || `hough-waves-${Date.now()}`;
+                        
+                        // Collect selected sizes
+                        const selectedSizes = Object.entries(this.downloadSizes)
+                            .filter(([key, selected]) => selected)
+                            .map(([key]) => ({ key, ...sizeConfigs[key] }));
+                        
+                        if (selectedSizes.length === 1) {
+                            // Single file download
+                            const size = selectedSizes[0];
+                            const dataUrl = await this.generateImageAtSize(size.width, size.height);
+                            this.downloadFile(dataUrl, `${baseFilename}-${size.label}.png`);
+                        } else if (this.downloadAsZip) {
+                            // Multiple files as ZIP
+                            await this.downloadAsZipFile(selectedSizes, baseFilename);
+                        } else {
+                            // Multiple individual files
+                            for (const size of selectedSizes) {
+                                const dataUrl = await this.generateImageAtSize(size.width, size.height);
+                                this.downloadFile(dataUrl, `${baseFilename}-${size.label}.png`);
+                                // Small delay between downloads to avoid browser blocking
+                                await new Promise(resolve => setTimeout(resolve, 300));
+                            }
+                        }
+                        
+                        // Close modal and reset
+                        this.showDownloadModal = false;
+                    } catch (error) {
+                        console.error('Download error:', error);
+                        alert('An error occurred during download. Please try again.');
+                    } finally {
+                        this.isDownloading = false;
+                    }
+                },
+                
+                async generateImageAtSize(width, height) {
+                    // Create a temporary canvas at the desired size
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = width;
+                    tempCanvas.height = height;
+                    const tempCtx = tempCanvas.getContext('2d');
+                    
+                    // Calculate scaling factor
+                    const scaleX = width / this.canvas.width;
+                    const scaleY = height / this.canvas.height;
+                    
+                    // Clear with appropriate background color
+                    tempCtx.fillStyle = this.darkMode ? '#000000' : '#ffffff';
+                    tempCtx.fillRect(0, 0, width, height);
+                    
+                    // Scale and draw each line
+                    this.lines.forEach((line, idx) => {
+                        const theta = line.theta;
+                        const rho = line.rho;
+                        const color = this.getColor(idx, this.lines.length);
+                        const strength = line.strength;
+                        
+                        const cos = Math.cos(theta);
+                        const sin = Math.sin(theta);
+                        
+                        // Scale rho based on canvas size
+                        const scaledRho = rho * Math.min(scaleX, scaleY);
+                        
+                        let x0 = cos * scaledRho;
+                        let y0 = sin * scaledRho;
+                        
+                        let x1 = x0 - sin * 5000;
+                        let y1 = y0 + cos * 5000;
+                        let x2 = x0 + sin * 5000;
+                        let y2 = y0 - cos * 5000;
+                        
+                        // Apply scaling to coordinates
+                        x1 = x1 * scaleX;
+                        y1 = y1 * scaleY;
+                        x2 = x2 * scaleX;
+                        y2 = y2 * scaleY;
+                        
+                        tempCtx.strokeStyle = color;
+                        tempCtx.globalAlpha = parseFloat(this.opacity) * Math.min(1, strength / 10);
+                        tempCtx.lineWidth = 0.5 * Math.min(scaleX, scaleY);
+                        tempCtx.beginPath();
+                        tempCtx.moveTo(x1, y1);
+                        tempCtx.lineTo(x2, y2);
+                        tempCtx.stroke();
+                        tempCtx.globalAlpha = 1;
+                    });
+                    
+                    return tempCanvas.toDataURL('image/png');
+                },
+                
+                downloadFile(dataUrl, filename) {
+                    const link = document.createElement('a');
+                    link.download = filename;
+                    link.href = dataUrl;
+                    link.click();
+                },
+                
+                async downloadAsZipFile(sizes, baseFilename) {
+                    const zip = new JSZip();
+                    
+                    // Generate and add each size to the zip
+                    for (const size of sizes) {
+                        const dataUrl = await this.generateImageAtSize(size.width, size.height);
+                        // Convert data URL to blob
+                        const base64Data = dataUrl.split(',')[1];
+                        zip.file(`${baseFilename}-${size.label}.png`, base64Data, { base64: true });
+                    }
+                    
+                    // Generate and download the zip file
+                    const zipBlob = await zip.generateAsync({ type: 'blob' });
+                    const zipUrl = URL.createObjectURL(zipBlob);
+                    this.downloadFile(zipUrl, `${baseFilename}.zip`);
+                    URL.revokeObjectURL(zipUrl);
+                },
+
+                async copySettingsToClipboard() {
+                    // Generate markdown content following SETTINGS-TEMPLATE.md format
+                    const timestamp = new Date().toISOString().split('T')[0];
+                    let markdown = `# Hough Waves - Exported Settings\n\n`;
+                    markdown += `**Exported**: ${timestamp}\n\n`;
+                    markdown += `## Settings\n\n`;
+                    markdown += `\`\`\`\n`;
+                    markdown += `pattern: ${this.pattern}\n`;
+                    
+                    // Include pattern-specific parameters immediately after pattern
+                    if (this.pattern === 'wave') {
+                        markdown += `waveFrequency: ${this.waveFrequency}\n`;
+                        markdown += `waveAmplitude: ${this.waveAmplitude}\n`;
+                    } else if (this.pattern === 'spiral') {
+                        markdown += `spiralRotations: ${this.spiralRotations}\n`;
+                        markdown += `spiralRadius: ${this.spiralRadius}\n`;
+                    } else if (this.pattern === 'circle') {
+                        markdown += `circleRadius: ${this.circleRadius}\n`;
+                    } else if (this.pattern === 'hough') {
+                        markdown += `houghWaveCount: ${this.houghWaveCount}\n`;
+                        markdown += `houghAmplitude: ${this.houghAmplitude}\n`;
+                        markdown += `houghFrequency: ${this.houghFrequency}\n`;
+                        markdown += `houghMorphProgress: ${this.houghMorphProgress}\n`;
+                    }
+                    
+                    markdown += `numPoints: ${this.numPoints}\n`;
+                    markdown += `threshold: ${this.threshold}\n`;
+                    markdown += `thetaStep: ${this.thetaStep}\n`;
+                    markdown += `opacity: ${this.opacity}\n`;
+                    markdown += `colorMode: ${this.colorMode}\n`;
+                    markdown += `useCoarseBinning: ${this.useCoarseBinning}\n`;
+                    
+                    // Only include coarse binning settings if enabled
+                    if (this.useCoarseBinning) {
+                        markdown += `thetaBinSize: ${this.thetaBinSize}\n`;
+                        markdown += `rhoBinSize: ${this.rhoBinSize}\n`;
+                    }
+                    
+                    markdown += `useDynamicThreshold: ${this.useDynamicThreshold}\n`;
+                    
+                    // Only include dynamic threshold settings if enabled
+                    if (this.useDynamicThreshold) {
+                        markdown += `thresholdMultiplier: ${this.thresholdMultiplier}\n`;
+                    }
+                    
+                    markdown += `useBlurring: ${this.useBlurring}\n`;
+                    
+                    // Only include blur settings if enabled
+                    if (this.useBlurring) {
+                        markdown += `blurRadius: ${this.blurRadius}\n`;
+                    }
+                    
+                    markdown += `darkMode: ${this.darkMode}\n`;
+                    markdown += `\`\`\`\n\n`;
+                    markdown += `---\n\n`;
+                    markdown += `*Generated by Hough Waves Generator*\n`;
+                    
+                    // Copy to clipboard
+                    try {
+                        await navigator.clipboard.writeText(markdown);
+                        alert('Settings copied to clipboard!');
+                    } catch (err) {
+                        // Fallback for older browsers
+                        const textarea = document.createElement('textarea');
+                        textarea.value = markdown;
+                        textarea.style.position = 'fixed';
+                        textarea.style.opacity = '0';
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        alert('Settings copied to clipboard!');
+                    }
+                },
+
+                async copyShareLink() {
+                    // Generate share link to GitHub Pages URL
+                    const shareUrl = 'https://wclaytor.github.io/hough-waves-generator/index.html';
+                    
+                    // Copy to clipboard
+                    try {
+                        await navigator.clipboard.writeText(shareUrl);
+                        alert('Share link copied to clipboard!');
+                    } catch (err) {
+                        // Fallback for older browsers
+                        const textarea = document.createElement('textarea');
+                        textarea.value = shareUrl;
+                        textarea.style.position = 'fixed';
+                        textarea.style.opacity = '0';
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        alert('Share link copied to clipboard!');
+                    }
+                },
+
+                exportSettings() {
+                    // Generate markdown content following SETTINGS-TEMPLATE.md format
+                    const timestamp = new Date().toISOString().split('T')[0];
+                    let markdown = `# Hough Waves - Exported Settings\n\n`;
+                    markdown += `**Exported**: ${timestamp}\n\n`;
+                    markdown += `## Settings\n\n`;
+                    markdown += `\`\`\`\n`;
+                    markdown += `pattern: ${this.pattern}\n`;
+                    
+                    // Include pattern-specific parameters immediately after pattern
+                    if (this.pattern === 'wave') {
+                        markdown += `waveFrequency: ${this.waveFrequency}\n`;
+                        markdown += `waveAmplitude: ${this.waveAmplitude}\n`;
+                    } else if (this.pattern === 'spiral') {
+                        markdown += `spiralRotations: ${this.spiralRotations}\n`;
+                        markdown += `spiralRadius: ${this.spiralRadius}\n`;
+                    } else if (this.pattern === 'circle') {
+                        markdown += `circleRadius: ${this.circleRadius}\n`;
+                    }
+                    
+                    markdown += `numPoints: ${this.numPoints}\n`;
+                    markdown += `threshold: ${this.threshold}\n`;
+                    markdown += `thetaStep: ${this.thetaStep}\n`;
+                    markdown += `opacity: ${this.opacity}\n`;
+                    markdown += `colorMode: ${this.colorMode}\n`;
+                    markdown += `useCoarseBinning: ${this.useCoarseBinning}\n`;
+                    
+                    // Only include coarse binning settings if enabled
+                    if (this.useCoarseBinning) {
+                        markdown += `thetaBinSize: ${this.thetaBinSize}\n`;
+                        markdown += `rhoBinSize: ${this.rhoBinSize}\n`;
+                    }
+                    
+                    markdown += `useDynamicThreshold: ${this.useDynamicThreshold}\n`;
+                    
+                    // Only include dynamic threshold settings if enabled
+                    if (this.useDynamicThreshold) {
+                        markdown += `thresholdMultiplier: ${this.thresholdMultiplier}\n`;
+                    }
+                    
+                    markdown += `useBlurring: ${this.useBlurring}\n`;
+                    
+                    // Only include blur settings if enabled
+                    if (this.useBlurring) {
+                        markdown += `blurRadius: ${this.blurRadius}\n`;
+                    }
+                    
+                    markdown += `darkMode: ${this.darkMode}\n`;
+                    markdown += `\`\`\`\n\n`;
+                    markdown += `---\n\n`;
+                    markdown += `*Generated by Hough Waves Generator*\n`;
+                    
+                    // Create and download the file
+                    const blob = new Blob([markdown], { type: 'text/markdown' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `hough-waves-settings-${timestamp}.md`;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                },
+
+                randomize() {
+                    this.numPoints = 20 + Math.floor(Math.random() * 100);
+                    this.threshold = 10 + Math.floor(Math.random() * 30);
+                    this.opacity = 0.02 + Math.random() * 0.3; // Range from 2% to 32%
+                    this.thetaStep = 0.5 + Math.random() * 2.5;
+                    this.pattern = ['wave', 'spiral', 'circle', 'grid', 'random', 'hough'][Math.floor(Math.random() * 6)];
+                    this.colorMode = ['arctic', 'autumn', 'awakening', 'bronze', 'california', 'campfire', 'concrete', 'copper', 'desert', 'fire', 'foolsgold', 'forest', 'galaxy', 'glass', 'gradient', 'hematite', 'irish', 'lava', 'matrix', 'midnight', 'mono', 'neon', 'obsidian', 'ocean', 'oldwest', 'pastel', 'platinum', 'rainbow', 'rasta', 'ruby', 'sand', 'sky', 'spring', 'stainless', 'sunset', 'twilight', 'usa'][Math.floor(Math.random() * 37)];
+                    
+                    // Randomize pattern-specific parameters
+                    this.waveFrequency = 0.1 + Math.random() * 9.9; // 0.1-10
+                    this.waveAmplitude = 1 + Math.floor(Math.random() * 250); // 1-250
+                    this.spiralRotations = 1 + Math.random() * 9; // 1-10
+                    this.spiralRadius = 0.2 + Math.random() * 0.3; // 0.2-0.5
+                    this.circleRadius = 0.1 + Math.random() * 0.4; // 0.1-0.5
+                    this.houghWaveCount = 5 + Math.floor(Math.random() * 36); // 5-40
+                    this.houghAmplitude = 10 + Math.floor(Math.random() * 191); // 10-200
+                    this.houghFrequency = 0.5 + Math.random() * 7.5; // 0.5-8
+                    this.houghMorphProgress = Math.random(); // 0-1
+                    
+                    this.generate();
+                },
+
+                // === PRESETS ===
+                async loadPresetsFromManifest() {
+                    this.loadingPresets = true;
+                    
+                    try {
+                        // Load preset list from manifest
+                        const manifestResponse = await fetch('presets.json');
+                        if (manifestResponse.ok) {
+                            const presetList = await manifestResponse.json();
+                            
+                            // Map filenames to preset objects
+                            this.presets = presetList
+                                .filter(filename => filename.endsWith('.md'))
+                                .map(filename => ({
+                                    name: filename.replace('.md', '').replace(/-/g, ' '),
+                                    filename: filename,
+                                    path: `presets/${filename}`,
+                                    id: filename.replace('.md', '')
+                                }));
+                        }
+                    } catch (error) {
+                        console.error('Error loading presets:', error);
+                    } finally {
+                        this.loadingPresets = false;
+                    }
+                },
+
+                async applyPreset() {
+                    if (!this.selectedPreset) {
+                        this.presetDescription = '';
+                        return;
+                    }
+
+                    this.loadingPresets = true;
+                    
+                    try {
+                        // Find the selected preset
+                        const preset = this.presets.find(p => p.id === this.selectedPreset);
+                        if (!preset) return;
+
+                        // Fetch markdown file from presets/ directory
+                        const response = await fetch(preset.path);
+                        if (!response.ok) {
+                            throw new Error('Failed to load preset file');
+                        }
+                        
+                        const markdown = await response.text();
+                        
+                        // Extract description (everything before "## Settings")
+                        const parts = markdown.split('## Settings');
+                        if (parts.length > 0) {
+                            // Get the title and description, remove the title heading
+                            let description = parts[0].trim();
+                            description = description.replace(/^#\s+[^\n]+\n+/, ''); // Remove title
+                            this.presetDescription = description.trim();
+                        }
+                        
+                        // Extract settings block (code block after "## Settings")
+                        if (parts.length > 1) {
+                            const settingsSection = parts[1];
+                            const codeBlockMatch = settingsSection.match(/```\s*\n([\s\S]*?)\n```/);
+                            
+                            if (codeBlockMatch) {
+                                const settingsText = codeBlockMatch[1];
+                                
+                                // Parse settings line by line
+                                const lines = settingsText.split('\n');
+                                const settings = {};
+                                
+                                lines.forEach(line => {
+                                    const match = line.match(/^(\w+):\s*(.+)$/);
+                                    if (match) {
+                                        const key = match[1];
+                                        let value = match[2].trim();
+                                        
+                                        // Convert string values to appropriate types
+                                        if (value === 'true') value = true;
+                                        else if (value === 'false') value = false;
+                                        else if (!isNaN(value)) value = parseFloat(value);
+                                        
+                                        settings[key] = value;
+                                    }
+                                });
+                                
+                                // Apply settings to component state
+                                if (settings.pattern) this.pattern = settings.pattern;
+                                if (settings.numPoints) this.numPoints = settings.numPoints;
+                                if (settings.threshold) this.threshold = settings.threshold;
+                                if (settings.thetaStep !== undefined) this.thetaStep = settings.thetaStep;
+                                if (settings.opacity !== undefined) this.opacity = settings.opacity;
+                                if (settings.colorMode) this.colorMode = settings.colorMode;
+                                if (settings.useCoarseBinning !== undefined) this.useCoarseBinning = settings.useCoarseBinning;
+                                if (settings.thetaBinSize !== undefined) this.thetaBinSize = settings.thetaBinSize;
+                                if (settings.rhoBinSize !== undefined) this.rhoBinSize = settings.rhoBinSize;
+                                if (settings.useDynamicThreshold !== undefined) this.useDynamicThreshold = settings.useDynamicThreshold;
+                                if (settings.thresholdMultiplier !== undefined) this.thresholdMultiplier = settings.thresholdMultiplier;
+                                if (settings.useBlurring !== undefined) this.useBlurring = settings.useBlurring;
+                                if (settings.blurRadius !== undefined) this.blurRadius = settings.blurRadius;
+                                
+                                // Pattern-specific parameters
+                                if (settings.waveFrequency !== undefined) this.waveFrequency = settings.waveFrequency;
+                                if (settings.waveAmplitude !== undefined) this.waveAmplitude = settings.waveAmplitude;
+                                if (settings.spiralRotations !== undefined) this.spiralRotations = settings.spiralRotations;
+                                if (settings.spiralRadius !== undefined) this.spiralRadius = settings.spiralRadius;
+                                if (settings.circleRadius !== undefined) this.circleRadius = settings.circleRadius;
+                                
+                                if (settings.darkMode !== undefined) {
+                                    this.darkMode = settings.darkMode;
+                                    this.updateDarkMode();
+                                }
+                                
+                                // Regenerate with new settings
+                                this.generate();
+                            }
+                        }
+                        
+                    } catch (error) {
+                        console.error('Error applying preset:', error);
+                        alert('Failed to load preset: ' + error.message);
+                    } finally {
+                        this.loadingPresets = false;
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- PWA Functionality -->
+    <script>
+        // Listen for PWA install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('PWA Install prompt available!');
+            // Optionally, you can store the event and show a custom install button
+            // e.preventDefault();
+            // window.deferredPrompt = e;
+        });
+
+        const iconSize = 192;
+
+        // Dynamically created manifest
+        const manifest = {
+            name: 'Hough Waves - Algorithmic Art',
+            short_name: 'Hough Waves',
+            display: 'standalone',
+            theme_color: '#3b82f6',
+            background_color: '#f9fafb',
+            start_url: window.location.href,
+            // PNG icon will be converted from SVG
+        };
+
+        // Convert the SVG favicon to PNG for platforms that don't support SVG
+        // (Safari and Firefox on Android)
+        (async function() {
+            const svgIconLink = document.querySelector('link[rel="icon"]');
+
+            // Convert from SVG string to PNG data URL
+            const pngDataUrl = await svgToPng(svgIconLink.href, iconSize);
+
+            // Set the icon meta tags to the new PNG
+            setIcon("link[rel='icon']", pngDataUrl, iconSize);
+            setIcon("link[rel='apple-touch-icon']", pngDataUrl);
+
+            // Dynamically create manifest
+            manifest.icons = [{
+                src: pngDataUrl,
+                sizes: `${iconSize}x${iconSize}`,
+                type: 'image/png'
+            }];
+
+            // Set the manifest meta tag data url
+            setManifest(manifest);
+
+            // Generate and set the iOS startup image
+            const startupImageDataUrl = await createStartupImage(
+                svgIconLink.href,
+                manifest.background_color
+            );
+            const startupLink = document.createElement('link');
+            startupLink.rel = 'apple-touch-startup-image';
+            startupLink.href = startupImageDataUrl;
+            document.head.appendChild(startupLink);
+        })();
+
+        function setManifest(manifest) {
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            const b64manifest = btoa(JSON.stringify(manifest));
+            link.href = "data:application/json;base64," + b64manifest;
+            document.head.appendChild(link);
+        }
+
+        function setIcon(query, iconurl, size) {
+            const iconLink = document.querySelector(query);
+            iconLink.href = iconurl;
+            iconLink.type = 'image/png';
+            if (size) {
+                iconLink.setAttribute('sizes', `${size}x${size}`);
+            }
+        }
+
+        function svgToPng(svgDataUrl, size) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = size;
+                    canvas.height = size;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, size, size);
+                    const pngDataUrl = canvas.toDataURL('image/png');
+                    resolve(pngDataUrl);
+                };
+                img.onerror = reject;
+                img.src = svgDataUrl;
+            });
+        }
+
+        // Safari needs a startup image
+        function createStartupImage(svgDataUrl, bgColor) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    const dpr = window.devicePixelRatio || 1;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = window.screen.width * dpr;
+                    canvas.height = window.screen.height * dpr;
+                    const ctx = canvas.getContext('2d');
+
+                    ctx.fillStyle = bgColor;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    const iconDisplaySize = canvas.width * 0.25;
+                    const x = (canvas.width - iconDisplaySize) / 2;
+                    const y = (canvas.height - iconDisplaySize) / 2;
+                    ctx.drawImage(img, x, y, iconDisplaySize, iconDisplaySize);
+
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.onerror = reject;
+                img.src = svgDataUrl;
+            });
+        }
+    </script>
+</body>
+    </html>
